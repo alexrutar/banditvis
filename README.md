@@ -16,9 +16,8 @@ The library is implemented in python3. This library is dependent also on the fol
 - numpy (math)
 - scipy (stats)
 - matplotlib (creating graphs)
+
 ## Usage
-
-
 ### Minilanguage Syntax
 Here is an example histogram input file:
 
@@ -39,7 +38,6 @@ Here is an example histogram input file:
             MeanVector: [0.4, 0.5, 0.6]
         label: "UCB"
 
-
     Simulation 2:
 
         Algorithm:
@@ -54,8 +52,72 @@ Here is an example histogram input file:
 
     PlotTitle: "Horizon 500 -- Arms (1, 2, -1), (2, 1, -1), (1, 0, 1) -- Mean (0.4, 0.5, 0.6)"
     PlotSave: "Lin_compare.pdf"
-
     Animate: False  # does a basic animation of the plot happening live; only works for one simulation
+
+The first line of the file always contains an `init: ` plus a declaration. Here are three types of supported declarations right now, with a brief description of each:
+- `Histogram` : makes a histogram, aggregating the regret from a large number of simulations
+- `Variable` : makes a line plot, with
+- `Visualize` : runs an animation
+
+The second most important aspect is the `Simulation` declaration. The number or character following is irrelevant; however, each name must be different if there are multiple `Simulation` declarations. Within the simulation, there are two major sub-classes: the `Algorithm` and the `Bandit`.
+
+The `Algorithm` sub-class describes the algorithm. `algtype` is the type of algorithm, and there are various other arguments depending on the specific `algtype` used. Those are described in detail in the *Siulation / Algorithm* secton.
+
+The 'Bandit' sub-class describes the bandit / environment. The `ArmList` sub class takes, for arguments, arm lists, which must be bracketed in python-style. There are also other arguments, depending on the type of arm - for example, a Linear Bandit also needs a `MeanVector` declaration. Those specifics are described in detail in the *Simulation / Bandit* section.
+
+There are also other various arguments, such as `PlotTitle` and `PlotSave`, which will be described farther down; the names are usually self-explanatory. Those are described in detail in the *Additional Arguments* section.
+
+Comments are done python-style, with a hash (`#`), and whitespace and blank lines are conveniently ignored.
+
+#### The `Simulation` Class
+##### The `Algorithm` Sub-Class
+Algorithms describe the behaviour of the bandit arm-choosing behaviour. Here is a list of the currently supported algorithms (called using `algtype`), with description, compatibility, and additional arguments needed as support:
+- `random`:
+  - Bandit Support: Bernoulli, Normal
+  - init Support: Histogram, Variable
+  - Additional Arguments: none
+- `greedy`:
+  - Bandit Support: Bernoulli, Normal
+  - init Support: Histogram, Variable
+  - Additional Arguments: none
+  -
+- `greedy_ep`:
+  - Bandit Support: Bernoulli, Normal
+  - init Support: Histogram, Variable
+  - Additional Arguments: `epsilon`
+- `UCB`:
+  - Bandit Support: Bernoulli, Normal
+  - init Support: Histogram, Variable, Visualize {confidence}
+  - Additional Arguments: `incr`, `alpha`
+- `KL_UCB`:
+  - Bandit Support: Bernoulli
+  - init Support: Histogram, Variable, Visualize {confidence}
+  - Additional Arguments: `incr`
+- `Bayes_Gauss`:
+  - Bandit Support: Normal
+  - init Support: Histogram, Variable, Visualize {confidence}
+  - Additional Arguments: none
+- `TS_Beta`:
+  - Bandit Support: Bernoullli
+  - init Support: Histogram, Variable
+  - Additional Arguments: none
+- `TS_Gauss`:
+  - Bandit Support: Normal
+  - init Support: Histogram, Variable
+  - Additional Arguments: none
+- `Lin_UCB`:
+  - Bandit Support: Linear
+  - init Support: Histogram, Variable, Visualize {confidence, ellipse}
+  - Additional Arguments: none
+- `Lin_TS`:
+  - Bandit Support: Linear
+  - init Support: Histogram, Variable, Visualize {ellipse}
+  - Additional Arguments: none
+
+
+
+##### The `Bandit` Sub-Class
+#### Additional Arguments
 
 ### Example Files
 
