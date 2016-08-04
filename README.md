@@ -7,17 +7,56 @@ This Bandit Visualization module provides an easy-to-use library for implementin
 
 It is good to use if you want to
 - Visualize your algorithms in various ways
+- Quickly make nice looking graphs
+- Have the support of a straightforward minilanguage
 - Easily add new algorithms to the existing ones (fully in python and numpy)
 
-
-## Usage
 The library is implemented in python3. This library is dependent also on the following modules, and you must have them installed to run this:
 - yaml (text parsing)
 - numpy (math)
 - scipy (stats)
 - matplotlib (creating graphs)
+## Usage
+
 
 ### Minilanguage Syntax
+Here is an example histogram input file:
+
+    init: Histogram
+
+    horizon: 500
+    cycles: 10000
+
+    Simulation 1:
+
+        Algorithm:
+            algtype: Lin_UCB
+        Bandit:
+            ArmList:
+            - [Linear, [1, 2, -1]]
+            - [Linear, [2, 1, -1]]
+            - [Linear, [1, 0, 1]]
+            MeanVector: [0.4, 0.5, 0.6]
+        label: "UCB"
+
+
+    Simulation 2:
+
+        Algorithm:
+            algtype: Lin_TS
+        Bandit:
+            ArmList:
+            - [Linear, [1, 2, -1]]
+            - [Linear, [2, 1, -1]]
+            - [Linear, [1, 0, 1]]
+            MeanVector: [0.4, 0.5, 0.6]
+        label: "TS"
+
+    PlotTitle: "Horizon 500 -- Arms (1, 2, -1), (2, 1, -1), (1, 0, 1) -- Mean (0.4, 0.5, 0.6)"
+    PlotSave: "Lin_compare.pdf"
+
+    Animate: False  # does a basic animation of the plot happening live; only works for one simulation
+
 ### Example Files
 
 ## How it Works
@@ -48,6 +87,8 @@ _(note: the current file structure is temporary and bound to change)_
 #### Build/Parse
 #### Build/DataGen
 #### Build/Plot
+
+### Rules
 #### Multiprocessor Rules
 
 
