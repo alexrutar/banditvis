@@ -17,12 +17,11 @@ The library is implemented in python3. This library is dependent also on the fol
 - scipy (stats)
 - matplotlib (creating graphs)
 
-## Usage
+## Usage Tutorial
 ### Running Files
 Input files are placed in the *Input* directory, and are run using `python3 run.py file_name.txt`, where `file_name.txt` is the input file in minilanguage syntax. When the simulation runs, it will either place an Output file in the *Output* directory, under the name you specified, or it will open an animation window. Because of a `matplotlib` issue, the animation may open behind the terminal window in some situations; running the terminal in full screen should avoid this.
-### Minilanguage Syntax
-For file examples, see farther down.
 
+### Minilanguage Syntax
 The first line of the file always contains an `init: ` plus a declaration. Here are three types of supported declarations right now, with a brief description of each:
 - `Histogram` : makes a histogram, aggregating the regret from a large number of simulations
 - `Variable` : makes a line plot, varying a user-controlled parameter
@@ -40,10 +39,7 @@ There are also other various arguments, such as `PlotTitle`, `PlotSave`, and `An
 
 Comments are done python-style with a hash (`#`), and whitespace and blank lines are conveniently ignored. For file examples, see the following three sections.
 
-
 ### The `Histogram` init
-Here is an example of a histogram file:
-
     init: Histogram  # comments done python-style
 
     horizon: 500
@@ -81,6 +77,7 @@ The histogram file runs a certain number of simulations (cycles) and produces a 
 The `PlotTitle` argument provides a name for your file. If it is left blank, the program will use the `PlotSave` name split at the period. The `PlotSave` argument provides the name under which to save the file; if left blank, it defaults to "temp.pdf".
 
 If Animate is set to True, an animation window will open and display a live build of the first simulation histogram as it runs, and will continue to run the simulation on a different process. If you close the animation window, the program will still run to completion and save the graph.
+
 ### The `Variable` init
     init: Variable
 
@@ -96,7 +93,6 @@ If Animate is set to True, an animation window will open and display a live buil
     cycles: 1000
 
     xlabel: "Delta"
-    ylabel: "Regret"
 
     Simulation 1:
         Algorithm:
@@ -131,6 +127,14 @@ If Animate is set to True, an animation window will open and display a live buil
     PlotSave: "vari_example.pdf"
     PlotTitle: "UCB (B7) vs TS Gauss vs Bayes Gauss -- Normal (0.3, 0.3 - Delta) -- Horizon (500)"
 
+The `Variable` init gives you the ability to plot the regret against some controlled variable. This controlled variable can be anything; it is a variable denoted by `&&`. You can place the `&&` anywhere withing the simulations, or in the `horizon` top level declarations. The plotter runs each simulation and substitutes in a value for every instance of `&&`, then runs that simulation a certain number of cycles. These values can be defined in two ways as sub-dictionaries under `Var`:
+- specify a domain and a number of samples, and the program does linear sampling
+- specify the arguments explicitly as a list, and the program will iterate through the list
+  - (TODO: arbitrary list comprehensions for the args)
+
+In the example shown, the mean of each Normal arm varies between 0.01 and 0.29, with 10 sample points. The plot will order the x-axis values for you, so there is no need to worry about argument order. However, you do have to define the `xlabel` variable or it will be left blank. A warning is that a Variable plot can take a long time to run; in the example provided, it needs to run 15 000 000 bandit updates, which may take a while depending on your computer.
+
+**Warning: Variable plots use `eval` to evaluate the `&&` substitutions. This results in arbitrarily increased power for good (you can use numpy functions, etc.) but it also means that it can evaluate almost anything!**
 
 ### The `Visualize` init
 ### Additional Features
