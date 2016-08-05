@@ -18,59 +18,71 @@ The library is implemented in python3. This library is dependent also on the fol
 - matplotlib (creating graphs)
 
 ## Usage
+### Running Files
+Input files are placed in the *Input* directory, and are run using `python3 run.py file_name.txt`, where `file_name.txt` is the input file in minilanguage syntax. When the simulation runs, it will either place an Output file in the *Output* directory, under the name you specified, or it will open an animation window. Because of a `matplotlib` issue, the animation may open behind the terminal window in some situations; running the terminal in full screen should avoid this.
 ### Minilanguage Syntax
-Here is an example histogram input file:
-
-    init: Histogram
-
-    horizon: 500
-    cycles: 10000
-
-    Simulation 1:
-
-        Algorithm:
-            algtype: Lin_UCB
-        Bandit:
-            ArmList:
-            - [Linear, [1, 2, -1]]
-            - [Linear, [2, 1, -1]]
-            - [Linear, [1, 0, 1]]
-            MeanVector: [0.4, 0.5, 0.6]
-        label: "UCB"
-
-    Simulation 2:
-
-        Algorithm:
-            algtype: Lin_TS
-        Bandit:
-            ArmList:
-            - [Linear, [1, 2, -1]]
-            - [Linear, [2, 1, -1]]
-            - [Linear, [1, 0, 1]]
-            MeanVector: [0.4, 0.5, 0.6]
-        label: "TS"
-
-    PlotTitle: "Horizon 500 -- Arms (1, 2, -1), (2, 1, -1), (1, 0, 1) -- Mean (0.4, 0.5, 0.6)"
-    PlotSave: "Lin_compare.pdf"
-    Animate: False  # does a basic animation of the plot happening live; only works for one simulation
+For file examples, see farther down.
 
 The first line of the file always contains an `init: ` plus a declaration. Here are three types of supported declarations right now, with a brief description of each:
 - `Histogram` : makes a histogram, aggregating the regret from a large number of simulations
-- `Variable` : makes a line plot, with
-- `Visualize` : runs an animation
+- `Variable` : makes a line plot, varying a user-controlled parameter
+- `Visualize` : runs an animation on a single cycle
 
 The second most important aspect is the `Simulation` declaration. The number or character following is irrelevant; however, each name must be different if there are multiple `Simulation` declarations. Within the simulation, there are two major sub-classes: the `Algorithm` and the `Bandit`.
 
-The `Algorithm` sub-class describes the algorithm. `algtype` is the type of algorithm, and there are various other arguments depending on the specific `algtype` used. Those are described in detail in the *Siulation / Algorithm* secton.
+The `Algorithm` sub-class describes the algorithm. `algtype` is the type of algorithm, and there are various other arguments depending on the specific `algtype` used. Those are described in detail in the *Simulation / Algorithm* secton.
 
-The 'Bandit' sub-class describes the bandit / environment. The `ArmList` sub class takes, for arguments, arm lists, which must be bracketed in python-style. There are also other arguments, depending on the type of arm - for example, a Linear Bandit also needs a `MeanVector` declaration. Those specifics are described in detail in the *Simulation / Bandit* section.
+The 'Bandit' sub-class describes the bandit / environment. The `ArmList` sub class takes a list of arms, which must be bracketed in python-style and preceded by a dash (`-`) and a space, as the example shows. Depending on the arm type, the second parameter will have different numbers of arguments to do different things. There are also other arguments, depending on the type of arm - for example, a Linear Bandit also needs a `MeanVector` declaration. Those specifics are described in detail in the *Simulation / Bandit* section.
 
-There are also other various arguments, such as `PlotTitle` and `PlotSave`, which will be described farther down; the names are usually self-explanatory. Those are described in detail in the *Additional Arguments* section.
+`Horizon` and `Cycles` denote the horizon that each simulation is to be run to, and the number of cycles that should be run. They can be declared at the top-level or within each simulation independently; top level declarations will be applied to all the simulations.
 
-Comments are done python-style, with a hash (`#`), and whitespace and blank lines are conveniently ignored.
+There are also other various arguments, such as `PlotTitle`, `PlotSave`, and `Animate` which will be described farther down; the names are usually self-explanatory. Those are described in detail in the *Additional Arguments* section.
 
-#### The `Simulation` Class
-##### The `Algorithm` Sub-Class
+Comments are done python-style with a hash (`#`), and whitespace and blank lines are conveniently ignored. For file examples, see the following three sections.
+
+
+### The `Histogram` init
+Here is an example of a histogram file:
+
+    init: Histogram  # comments done python-style
+
+    horizon: 500
+    cycles: 1000
+
+    Simulation 1:
+        Algorithm:
+            algtype: KL_UCB
+            incr: B7
+        Bandit:
+            ArmList:
+            - [Bernoulli, [0.3]]
+            - [Bernoulli, [0.4]]
+            - [Bernoulli, [0.5]]
+        label: "KL UCB"
+
+    Simulation 2:
+        Algorithm:
+            algtype: UCB
+            incr: B7
+            alpha: 0.5
+        Bandit:
+            ArmList:
+            - [Bernoulli, [0.3]]
+            - [Bernoulli, [0.4]]
+            - [Bernoulli, [0.5]]
+        label: "UCB"
+
+    PlotTitle: "Horizon 500 -- Means (0.3, 0.4, 0.5) -- Bernoulli"
+    PlotSave: "example.pdf"
+    Animate: False
+
+The histogram file runs a certain number of simulations (cycles) and produces a histogram plot with regret on the x-axis and frequency on the y-axis. If animate is set to True, an animation window will open and display a live build of the histogram
+### The `Variable` init
+### The `Visualize` init
+
+
+### The `Simulation` Class
+#### The `Algorithm` Sub-Class
 Algorithms describe the behaviour of the bandit arm-choosing behaviour. Here is a list of the currently supported algorithms (called using `algtype`), with description, compatibility, and additional arguments needed as support:
 - `random`:
   - Bandit Support: Bernoulli, Normal
@@ -80,7 +92,6 @@ Algorithms describe the behaviour of the bandit arm-choosing behaviour. Here is 
   - Bandit Support: Bernoulli, Normal
   - init Support: Histogram, Variable
   - Additional Arguments: none
-  -
 - `greedy_ep`:
   - Bandit Support: Bernoulli, Normal
   - init Support: Histogram, Variable
@@ -114,14 +125,14 @@ Algorithms describe the behaviour of the bandit arm-choosing behaviour. Here is 
   - init Support: Histogram, Variable, Visualize {ellipse}
   - Additional Arguments: none
 
-
-
-##### The `Bandit` Sub-Class
-#### Additional Arguments
+#### The `Bandit` Sub-Class
+### Additional Arguments and Features
 
 ### Example Files
+Example files can be found in the Example folder. It contains a semi-comprehensive overview of what this program can do.
 
-## How it Works
+
+## Further Details
 The *Build* folder countains five sub-folders:
 - Core: Underlying Bandit algorithms and environment
 - Parse: Take a user input file (see minilanguage syntax) and builds a dictionary of values
@@ -134,12 +145,6 @@ Here is an overview of what the program does:
 - The *user_file* is passed to the *text_parse* module which uses YAML to convert the user input into a rudimentary dictionary. This dictionary is passed to a dictionary checker which checks general consistency and establishes some defaults.
 - Now that the dictionary is finished, it will no longer be modified. It is passed as an argument to the various functions in the *DataGen* module, depending on the type of data that is desired, then passed to the *Plot* module to make various plots. *Histogram* and *Variable* plots depend on generated or existing data to build the plots.
 - For animations, the bandit is run inline using an update function, without generating external data.
-
-#### Making Histograms - `Histogram`
-#### Making Variable Plots - `Variable`
-#### Making Animations - `Visualize`
-
-## Further Details
 
 ### Overall File Structure
 _(note: the current file structure is temporary and bound to change)_
@@ -169,7 +174,7 @@ The critical importance of core_dict
     all communication between DataGen and Plot functions is done by reading and writing to text files; this is described in more detail under Data generation / saving procedure
 
 sub_dict notation:  // explain notation used in general
-    sub_dict is some sub dictionary of core_dict
+    *sub_dict* is some sub dictionary of *core_dict*
 
 Processes, opening subprocesses, mac limitations, etc.
     all graphical processes must be in main

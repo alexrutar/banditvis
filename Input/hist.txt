@@ -1,34 +1,33 @@
-init: Histogram
+init: Histogram  # comments done python-style
 
 horizon: 500
-cycles: 10000
+cycles: 1000
 
 Simulation 1:
 
     Algorithm:
-        algtype: Lin_UCB
+        algtype: KL_UCB
+        incr: B1
     Bandit:
         ArmList:
-        - [Linear, [1, 2, -1]]
-        - [Linear, [2, 1, -1]]
-        - [Linear, [1, 0, 1]]
-        MeanVector: [0.4, 0.5, 0.6]
-    label: "UCB"
-
+        - [Bernoulli, [0.3]]
+        - [Bernoulli, [0.4]]
+        - [Bernoulli, [0.5]]
+    label: "KL UCB"
 
 Simulation 2:
 
     Algorithm:
-        algtype: Lin_TS
+        algtype: UCB
+        incr: B7
+        alpha: 0.5
     Bandit:
         ArmList:
-        - [Linear, [1, 2, -1]]
-        - [Linear, [2, 1, -1]]
-        - [Linear, [1, 0, 1]]
-        MeanVector: [0.4, 0.5, 0.6]
-    label: "TS"
+        - [Bernoulli, [0.3]]
+        - [Bernoulli, [0.4]]
+        - [Bernoulli, [0.5]]
+    label: "UCB"
 
-PlotTitle: "Horizon 500 -- Arms (1, 2, -1), (2, 1, -1), (1, 0, 1) -- Mean (0.4, 0.5, 0.6)"
-PlotSave: "Lin_compare.pdf"
-
-Animate: False  # does a basic animation of the plot happening live; only works for one simulation
+PlotTitle: "Horizon 500 -- Means (0.3, 0.4, 0.5) -- Bernoulli"
+PlotSave: "example.pdf"
+Animate: True

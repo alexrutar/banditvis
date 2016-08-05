@@ -44,7 +44,7 @@ def _defaults(core_dict):
         core_dict.setdefault('data_folder',
             "Data/{}".format(core_dict['init'][:4] + " " + datetime.strftime(
                 datetime.now(), '%Y-%m-%d %H_%M_%S')))
-        core_dict.setdefault('animation', False)
+        core_dict.setdefault('Animate', False)
     for sub_dict in core_dict['sim']:
         if core_dict['init'] == 'Visualize':
             sub_dict.setdefault('NoAxesTick', False)

@@ -30,7 +30,7 @@ if __name__ == '__main__':
     if core_dict['init'] == 'Histogram':
         p1 = Process(target=HistData, args=(core_dict, ))
         p1.start()
-        if core_dict['animation']:
+        if core_dict['Animate']:
             HistAnimation(core_dict)
         p1.join()  # holds main() until p1 is done
         makeHist(core_dict)
