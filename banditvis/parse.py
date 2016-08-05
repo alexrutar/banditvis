@@ -72,6 +72,8 @@ def _defaults(core_dict):
                 datetime.now(), '%Y-%m-%d %H_%M_%S')))
         core_dict.setdefault('Animate', False)
         core_dict.setdefault('PlotSave', "temp.pdf")
+    if core_dict['init'] == 'Variable':
+        core_dict.setdefault('ylabel' 'Regret')
     for sub_dict in core_dict['sim']:
         if core_dict['init'] == 'Visualize':
             sub_dict.setdefault('NoAxesTick', False)
