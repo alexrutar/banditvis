@@ -1,6 +1,30 @@
 # Bandit Visualization Documentation
 _IN PROGRESS_
 
+  * [Bandit Visualization Documentation](#bandit-visualization-documentation)
+    * [Usage Tutorial](#usage-tutorial)
+      * [Running Files](#running-files)
+      * [Minilanguage Syntax](#minilanguage-syntax)
+      * [The Histogram init](#the-histogram-init)
+      * [The Variable init](#the-variable-init)
+      * [The Visualize init](#the-visualize-init)
+      * [Additional Features](#additional-features)
+    * [Argument Summary](#argument-summary)
+      * [The Simulation Class](#the-simulation-class)
+        * [The Algorithm Sub-Class](#the-algorithm-sub-class)
+        * [The Bandit Sub-Class](#the-bandit-sub-class)
+        * [Additional Arguments](#additional-arguments)
+    * [Further Details](#further-details)
+      * [Overall File Structure](#overall-file-structure)
+      * [The <em>Build</em> Directory](#the-build-directory)
+        * [Build/Core](#buildcore)
+        * [Build/Parse](#buildparse)
+        * [Build/DataGen](#builddatagen)
+        * [Build/Plot](#buildplot)
+      * [Rules](#rules)
+        * [Multiprocessor Rules](#multiprocessor-rules)
+      * [Notes](#notes)
+
 This Bandit Visualization module provides an easy-to-use library for implementing and visualizing various Bandit algorithms and environments in machine learning. If you are looking for the following, this library is not for you:
 - You want something fast and efficient
 - You want a tool to run very large simulations
