@@ -1,5 +1,5 @@
 _IN PROGRESS_
-
+# Table of Contents
   * [Usage Tutorial](#usage-tutorial)
     * [Running Files](#running-files)
     * [Minilanguage Syntax](#minilanguage-syntax)
