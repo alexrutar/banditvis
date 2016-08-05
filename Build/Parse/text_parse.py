@@ -10,7 +10,30 @@ from Build.Formatting.colors import bcolors
 
 
 def Parse(user_file):
-    core_dict = yaml.load(open(user_file, 'r'))
+    try:
+        core_dict = yaml.load(open(user_file, 'r'))
+    except yaml.parser.ParserError as e:
+        location = (str(e).split("\n")[1].split(",")[1]
+            + str(e).split("\n")[1].split(",")[2]
+            )[1:]
+        e_msg = str(e).split("\n")[2]
+        sys.exit(
+            bcolors.FAIL
+            + "\nYAML Syntax Error "
+            + bcolors.ENDC
+            + "in {}:\n  > {}\n".format(location, e_msg)
+            )
+    except yaml.scanner.ScannerError as e:
+        location = (str(e).split("\n")[1].split(",")[1]
+            + str(e).split("\n")[1].split(",")[2]
+            )[1:]
+        e_msg = str(e).split("\n")[0]
+        sys.exit(
+            bcolors.FAIL
+            + "\nYAML Syntax Error "
+            + bcolors.ENDC
+            + "in {}:\n  > {}\n".format(location, e_msg)
+            )
     core_dict['sim'] = []
     for sim_key in list(core_dict.keys()):
         if sim_key[:10] == 'Simulation':
