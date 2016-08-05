@@ -1,3 +1,5 @@
 *.DS_Store
 Data/*
 Output/*
+!Data/info.txt
+!Output/info.txt
