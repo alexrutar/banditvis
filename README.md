@@ -48,13 +48,13 @@ The first line of the file always contains an `init: ` plus a declaration. Here 
 
 The second most important aspect is the `Simulation` declaration. The number or character following is irrelevant; however, each name must be different if there are multiple `Simulation` declarations. Within the simulation, there are two major sub-classes: the `Algorithm` and the `Bandit`.
 
-The `Algorithm` sub-class describes the algorithm. `algtype` is the type of algorithm, and there are various other arguments depending on the specific `algtype` used. Those are described in detail in the *Simulation / Algorithm* secton.
+The `Algorithm` sub-class describes the algorithm. `algtype` is the type of algorithm, and there are various other arguments depending on the specific `algtype` used. Those are described in detail in the [Algorithm Sub-Class](#the-algorithm-sub-class) secton.
 
-The 'Bandit' sub-class describes the bandit / environment. The `ArmList` sub class takes a list of arms, which must be bracketed in python-style and preceded by a dash (`-`) and a space, as the example shows. Depending on the arm type, the second parameter will have different numbers of arguments to do different things. There are also other arguments, depending on the type of arm - for example, a Linear Bandit also needs a `MeanVector` declaration. Those specifics are described in detail in the *Simulation / Bandit* section.
+The 'Bandit' sub-class describes the bandit / environment. The `ArmList` sub class takes a list of arms, which must be bracketed in python-style and preceded by a dash (`-`) and a space, as the example shows. Depending on the arm type, the second parameter will have different numbers of arguments to do different things. There are also other arguments, depending on the type of arm - for example, a Linear Bandit also needs a `MeanVector` declaration. Those specifics are described in detail in the [Bandit Sub-Class](#the-bandit-sub-class) section.
 
 `Horizon` and `Cycles` denote the horizon that each simulation is to be run to, and the number of cycles that should be run. They can be declared at the top-level or within each simulation independently; top level declarations will be applied to all the simulations.
 
-There are also other various arguments, such as `PlotTitle`, `PlotSave`, and `Animate` which will be described farther down; the names are usually self-explanatory. Those are described in detail in the *Additional Arguments* section.
+There are also other various arguments, such as `PlotTitle`, `PlotSave`, and `Animate` which will be described farther down; the names are usually self-explanatory. Those are described in detail in the [Additional Arguments](#additional-arguments) section.
 
 Comments are done python-style with a hash (`#`), and whitespace and blank lines are conveniently ignored. For file examples, see the following three sections.
 
@@ -101,12 +101,10 @@ If Animate is set to True, an animation window will open and display a live buil
     init: Variable
 
     Var:
-        # you can pass arguments like this, and it does linear sampling for you
-        domain: [0.01, 0.29]
+        domain: [0.01, 0.29]  # you can pass arguments like this, and it does linear sampling for you
         samples: 10
 
-        # or you can pass arguments explicitly:
-        # args: [0.01, 0.07, 0.09, 0.16]
+        # args: [0.01, 0.07, 0.09, 0.16]  # or you can pass arguments explicitly
 
     horizon: 500
     cycles: 1000
@@ -156,6 +154,70 @@ In the example shown, the mean of each Normal arm varies between 0.01 and 0.29, 
 **Warning: Variable plots use `eval` to evaluate the `&&` substitutions. This results in arbitrarily increased power for good (you can use numpy functions, etc.) but it also means that it can evaluate almost anything!**
 
 ## The `Visualize` init
+The `Visualize` init is arguably the most interesting because it runs active animations of Bandit algorithms within a single cycle. The input file must also contain a `visual` argument, in order to determine the type of animation to be run. The two currently supported arguments are
+- `ellipse`
+- `confidence`
+The `confidence` visual creates an animation of a scalar upper confidence bound used in many algorithms, and the `ellipse` visual creates an animation of the confidence ellipse used by certain linear bandit algorithms.
+
+Every `Visualize` init takes only a single simulation class within the declaration; anything more will be ignored. Furthermore, for a full list of compatibility simulation compatiblility, look in the [Argument Summary](#argument-summary) section.
+
+### The `ellipse` visual
+    init: Visualize
+    visual: "ellipse"
+
+    horizon: 5000
+
+    Simulation:
+        Algorithm:
+            algtype: Lin_TS
+        Bandit:
+            ArmList:
+            - [Linear, [1., 1.]]
+            - [Linear, [1., 0.]]
+            - [Linear, [1., -1.]]
+            - [Linear, [-1., 1.]]
+            - [Linear, [-1., 0.]]
+            - [Linear, [-1., -1.]]
+            - [Linear, [0., 1.]]
+            - [Linear, [0., -1.]]
+            MeanVector: [0.3, 0.4]
+
+        Normalized: True
+        NoAxesTick: True
+        HelpLines: True
+        FPS: 20
+The ellipse visualization takes a 2D linear bandit; when run, it displays the arm vectors, the actual mean, and the confidence ellipse, as the simulation progresses. There are also some additional optional arguments within the Simulation declaration:
+- `Normalized`: This is a more general Linear Bandit argument that takes every arm and mean vector, preserving the direction but dividing by the length. Defaults to False.
+- `NoAxesTick`: Option the plot easier to view. If True it removes axes ticks and labels. Defaults to False.
+- `HelpLines`: display extension of the mean vector, and perpindicular projections of the arm vectors onto it to see the mean reward that would be recieved from a given arm. Defaults to True.
+- `FPS`: Control the animation update rate. If the animation is running too slowly on your computer, you can decrease this number. Defults to 20.
+- `LevelCurves`: For the Linear Thomson Sampling algorithm, you can set this to True and it will display level curves. It is meaningless in any other situation.
+
+### The `confidence` visual
+    init: Visualize
+
+    horizon: 5000
+
+    visual: "confidence"
+
+    Simulation 1:
+        Algorithm:
+            algtype: KL_UCB
+            incr: B3
+        Bandit:
+            ArmList:
+            - [Bernoulli, [0.1]]
+            - [Bernoulli, [0.2]]
+            - [Bernoulli, [0.4]]
+        label: "TS Beta"
+
+The `confidence` visual provides an animation of the scalar upper confidence bound used by many algorithms.
+
+# the Visualize class is to visualize the behaviour of an algorithm in a single cycle
+# the bandit and the graph are run concurrently in a single file
+
+
+
 ## Additional Features
 Here is a list of currently supported additional features:
 - Error Checking: YAML does the syntax error checking if you have mistyped arguments. There is also a small error parser which tries to catch argument-based errors and inconsistent declarations.
@@ -165,6 +227,8 @@ Here is a list of features that will be implemented in the future:
 - Multiprocessing Control: You can specify how many cores you want to use using the `Cores` argument, and it will open the appropriate number of processes to generate the data. This feature is incompatible with the `Animate` argument.
 
 # Argument Summary
+## Using this Summary
+When you are preparing an input file, you can use this section to determine compatibliity. For more detail, see the PDF reference file under documentation; this provides a more detailed overview of each algorithm.
 ## The `Simulation` Class
 ### The `Algorithm` Sub-Class
 Algorithms describe the behaviour of the bandit arm-choosing behaviour. Here is a list of the currently supported algorithms (called using `algtype`), with description, compatibility, and additional arguments needed as support:
@@ -191,7 +255,7 @@ Algorithms describe the behaviour of the bandit arm-choosing behaviour. Here is 
 - `Bayes_Gauss`:
   - Bandit Support: Normal
   - init Support: Histogram, Variable, Visualize {confidence}
-  - Additional Arguments: incr
+  - Additional Arguments: `incr`
 - `TS_Beta`:
   - Bandit Support: Bernoullli
   - init Support: Histogram, Variable
@@ -202,7 +266,7 @@ Algorithms describe the behaviour of the bandit arm-choosing behaviour. Here is 
   - Additional Arguments: none
 - `Lin_UCB`:
   - Bandit Support: Linear
-  - init Support: Histogram, Variable, Visualize {confidence, ellipse}
+  - init Support: Histogram, Variable, Visualize {ellipse}
   - Additional Arguments: none
 - `Lin_TS`:
   - Bandit Support: Linear
@@ -219,13 +283,7 @@ Example files can be found in the Example folder. It contains a semi-comprehensi
 
 
 # Further Details
-The *Build* folder countains five sub-folders:
-- Core: Underlying Bandit algorithms and environment
-- Parse: Take a user input file (see minilanguage syntax) and builds a dictionary of values
-- DataGen: Runs the simulations to create external data folders
-- Plot: Makes plots and animations
-- Formatting: extraneous tools that don't fit anywhere (TODO move this thing somewhere else)
-
+**Note: in the future, this section will likely be moved to the Documentation folder as a PDF / tex file**
 Here is an overview of what the program does:
 - The user inputs a file using `python3 run.py user_file.txt` from the command line. `run.py` is the general process manager that calls the appropriate functions when necessary
 - The *user_file* is passed to the *text_parse* module which uses YAML to convert the user input into a rudimentary dictionary. This dictionary is passed to a dictionary checker which checks general consistency and establishes some defaults.
