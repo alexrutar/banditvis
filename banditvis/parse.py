@@ -77,6 +77,7 @@ def _defaults(core_dict):
         core_dict.setdefault('xlabel', ' ')
     for sub_dict in core_dict['sim']:
         if core_dict['init'] == 'Visualize':
+            core_dict.setdefault('FPS', 20)
             sub_dict.setdefault('NoAxesTick', False)
             sub_dict.setdefault('HelpLines', True)
             sub_dict.setdefault('FPS', 20)

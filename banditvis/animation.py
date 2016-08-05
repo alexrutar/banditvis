@@ -87,11 +87,8 @@ def HistAnimation(core_dict):
     # build the animation and run it
     my_ani = animation.FuncAnimation(fig, _update,
         fargs=(data, ),
-        interval=50)
+        interval=1000/core_dict['FPS'])
     plt.show()
-
-
-
 
 
 def ConfAnimation(core_dict):
@@ -188,6 +185,16 @@ def ConfAnimation(core_dict):
                 ls='dashed',
                 mfc='white')
 
+        # add dotted lines for the system mean of each arm
+        for i in range(sim.bandit.n_arms):
+            x = [i - bar_width/2, i + bar_width/2]
+            y = [sim.bandit.U[i], sim.bandit.U[i]]
+            plt.plot(x,y,'--',
+                linewidth = 1,
+                color='#000000',
+                ls='-',
+                mfc='white')
+
         # add x labels
         plt.xticks(index, x_labels, weight='bold')
 
@@ -200,8 +207,17 @@ def ConfAnimation(core_dict):
         not_picked_color_path = mpatches.Patch(
             color=not_picked_color,
             label='Arm(s) not chosen')
+        dash_label, = plt.plot([], [],
+            ls="dashed",
+            label="Actual Mean",
+            color='black')
+        dashdot_label, = plt.plot([], [],
+            ls="-",
+            linewidth=1.0,
+            label="System Mean",
+            color='black')
         legend_1 = plt.legend(
-            handles=[picked_color_path, not_picked_color_path],
+            handles=[picked_color_path, not_picked_color_path, dash_label, dashdot_label],
             loc='upper right')
         plt.gca().add_artist(legend_1)  # prevent legend_2 from overwriting
         legend_1.get_frame().set_linewidth(1)
@@ -227,11 +243,9 @@ def ConfAnimation(core_dict):
     # the animation declaration
     my_ani = animation.FuncAnimation(fig, _update,
         fargs=(sim.bandit.U_conf, ),
-        interval = 50)  # fargs is used as the data required in update_hist
+        interval=1000/core_dict['FPS'])  # fargs is used as the data required in update_hist
 
     plt.show()
-
-
 
 
 def EllipseAnimation(core_dict):
@@ -377,7 +391,7 @@ def EllipseAnimation(core_dict):
         ax.spines['left'].set_position(('data',0))
 
         # remove label option
-        if sim_dict['NoAxesTick']:
+        if core_dict['NoAxesTick']:
             ax.set_xticks([])
             ax.set_yticks([])
 
@@ -395,18 +409,27 @@ def EllipseAnimation(core_dict):
             color='black',
             label='True Mean')
 
-        # plot the ellipse and the mean
-        plot_ellipse(rho, G_inv, bandit_mean,
-            alpha=0.2,
-            facecolor=cmap1(0.5),
-            edgecolor=cmap1(1.0))
+        # plot the ellipse and the mean; checks for LevelCurves option
+        if (sim.alg.var_dict['algtype'].__name__ == "Lin_TS"
+            and core_dict['LevelCurves'] == True):
+            for i in [33, 29, 25, 21, 17, 13, 9, 5, 1]:
+                plot_ellipse(i, G_inv, bandit_mean,
+                    alpha=0.1,
+                    ls='dashed',
+                    facecolor=cmap1(0.2),
+                    edgecolor='black')
+        else:
+            plot_ellipse(rho, G_inv, bandit_mean,
+                alpha=0.2,
+                facecolor=cmap1(0.5),
+                edgecolor=cmap1(1.0))
         plt.plot([sim.bandit.U[0]], [sim.bandit.U[1]], "o",
             markerfacecolor=cmap2(0.5),
             markeredgecolor=cmap2(1.0),
             label='Approximated Mean')
 
         # HelpLines: dashed projection lines to show reward value
-        if sim_dict['HelpLines']:
+        if core_dict['HelpLines']:
             for proj, arm in zip(projs, arms):
                 plt.plot([proj[0], arm[0]], [proj[1], arm[1]],
                     color='black',
@@ -455,6 +478,6 @@ def EllipseAnimation(core_dict):
     # the animation declaration
     my_ani = animation.FuncAnimation(fig, _update,
         fargs=(sim.bandit.U_conf, ),
-        interval = 50)  # fargs is used as the data required in update_hist
+        interval=1000/core_dict['FPS'])  # fargs is used as the data required in update_hist
 
     plt.show()

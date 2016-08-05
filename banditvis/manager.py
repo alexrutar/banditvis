@@ -6,7 +6,7 @@ import time
 from .parse import Parse
 from .plot import HistPlot, VarPlot
 from .data import HistData, VarData
-from .animation import HistAnimation, EllipseAnimation
+from .animation import HistAnimation, EllipseAnimation, ConfAnimation
 
 def banditvis():
     start_time = time.clock()
@@ -43,7 +43,6 @@ def banditvis():
         VarPlot(core_dict)
 
     elif core_dict['init'] == 'Visualize':
-        from Build.Plot.Animation import ConfAnimation
         if core_dict['visual'] == 'ellipse':
             EllipseAnimation(core_dict)
         elif core_dict['visual'] == 'confidence':
