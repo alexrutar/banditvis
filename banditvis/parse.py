@@ -73,7 +73,8 @@ def _defaults(core_dict):
         core_dict.setdefault('Animate', False)
         core_dict.setdefault('PlotSave', "temp.pdf")
     if core_dict['init'] == 'Variable':
-        core_dict.setdefault('ylabel' 'Regret')
+        core_dict.setdefault('ylabel', 'Regret')
+        core_dict.setdefault('xlabel', ' ')
     for sub_dict in core_dict['sim']:
         if core_dict['init'] == 'Visualize':
             sub_dict.setdefault('NoAxesTick', False)

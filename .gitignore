@@ -1,5 +1,6 @@
 *.DS_Store
 Data/*
 Output/*
+gh-md-toc
 !Data/info.txt
 !Output/info.txt

@@ -1,5 +1,6 @@
 _IN PROGRESS_
 # Table of Contents
+  * [Intro](#intro)
   * [Usage Tutorial](#usage-tutorial)
     * [Running Files](#running-files)
     * [Minilanguage Syntax](#minilanguage-syntax)
@@ -18,6 +19,7 @@ _IN PROGRESS_
       * [Multiprocessor Rules](#multiprocessor-rules)
     * [Notes](#notes)
 
+# Intro
 This Bandit Visualization module provides an easy-to-use library for implementing and visualizing various Bandit algorithms and environments in machine learning. If you are looking for the following, this library is not for you:
 - You want something fast and efficient
 - You want a tool to run very large simulations
