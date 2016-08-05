@@ -1,57 +1,48 @@
 init: Variable
+
 Var:
-
-    interpolate: True  # add support for this
-
     # you can pass arguments like this, and it does linear sampling for you
+    domain: [0.01, 0.29]
+    samples: 10
 
-    domain: [0.2, 0.29]  # fix check for too many arguments
-    samples: 30
-
-    # or you can pass arguments as a list:
-    # args: [10, 20, 30, 40]
-
+    # or you can pass arguments explicitly:
+    # args: [0.01, 0.07, 0.09, 0.16]
 
 horizon: 500
-cycles: 2
+cycles: 1000
 
-# Simulation 1:  # the labels aren't actually necessary
-#
-#     Algorithm:
-#         algtype: TS_Beta
-#     Bandit:
-#         ArmList:
-#             - [Bernoulli, [0.3 - &&]]
-#             - [Bernoulli, [0.3]]
-#     label: "TS Beta"
-#
-# Simulation 2:
-#
-#     Algorithm:
-#         algtype: KL_UCB
-#         incr: B7
-#     Bandit:
-#         ArmList:
-#         - [Normal, [0.3 - &&, 1  ]]
-#         - [Normal, [0.3, 1]]
-#     label: "KL UCB - B7"
+xlabel: "Delta"
+ylabel: "Regret"
 
-Simulation 3:
-
+Simulation 1:
     Algorithm:
-        algtype: Lin_UCB
+        algtype: TS_Gauss
     Bandit:
         ArmList:
-        - [Linear, [0.2, 0.3+&&, 0.4]]
-        - [Linear, [0.4*&&, 0.1, -0.6]]
-        MeanVector: [1,1,0]
-    label: "KL UCB - B7"
+        - [Normal, [0.3 - &&, 1]]
+        - [Normal, [0.3, 1]]
+    label: "TS Gauss"
 
+Simulation 2:
+    Algorithm:
+        algtype: UCB
+        incr: B7
+        alpha: 2.0
+    Bandit:
+        ArmList:
+        - [Normal, [0.3 - &&, 1  ]]
+        - [Normal, [0.3, 1]]
+    label: "UCB - B7"
 
+Simulation 3:
+    Algorithm:
+        algtype: Bayes_Gauss
+        incr: B1
+    Bandit:
+        ArmList:
+        - [Normal, [0.3 - &&, 1]]
+        - [Normal, [0.3, 1]]
+    label: "Bayes_Gauss"
 
-PlotSave: "temp_2.pdf"
-
-
-PlotTitle: "KL UCB (B7) vs TS Beta -- Bernoulli (0.3, 0.3 - Delta) -- Horizon (500)"
-
-Animate: False
+PlotSave: "vari_example.pdf"
+PlotTitle: "UCB (B7) vs TS Gauss vs Bayes Gauss -- Normal (0.3, 0.3 - Delta) -- Horizon (500)"

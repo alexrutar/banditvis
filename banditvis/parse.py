@@ -10,6 +10,7 @@ from .formatting import bcolors
 
 
 def Parse(user_file):
+    # load the file using YAML and format the error messages nicely
     try:
         core_dict = yaml.load(open(user_file, 'r'))
     except yaml.parser.ParserError as e:
@@ -34,6 +35,8 @@ def Parse(user_file):
             + bcolors.ENDC
             + "in {}:\n  > {}\n".format(location, e_msg)
             )
+
+    # creates a simulation dictionary list for easier access
     core_dict['sim'] = []
     for sim_key in list(core_dict.keys()):
         if sim_key[:10] == 'Simulation':
@@ -68,6 +71,7 @@ def _defaults(core_dict):
             "Data/{}".format(core_dict['init'][:4] + " " + datetime.strftime(
                 datetime.now(), '%Y-%m-%d %H_%M_%S')))
         core_dict.setdefault('Animate', False)
+        core_dict.setdefault('PlotSave', "temp.pdf")
     for sub_dict in core_dict['sim']:
         if core_dict['init'] == 'Visualize':
             sub_dict.setdefault('NoAxesTick', False)

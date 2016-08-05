@@ -4,11 +4,11 @@ import sys
 import time
 
 from .parse import Parse
-from .plot import HistPlot, makeVar
+from .plot import HistPlot, VarPlot
 from .data import HistData, VarData
 from .animation import HistAnimation, EllipseAnimation
 
-def runbanditvis():
+def banditvis():
     start_time = time.clock()
 
     try:
@@ -40,12 +40,10 @@ def runbanditvis():
         p1 = Process(target=VarData, args=(core_dict, ))
         p1.start()
         p1.join()
-        print("P1 DONE")
-        makeVar(core_dict)
+        VarPlot(core_dict)
 
     elif core_dict['init'] == 'Visualize':
         from Build.Plot.Animation import ConfAnimation
-        # ConfAnimation(core_dict)
         if core_dict['visual'] == 'ellipse':
             EllipseAnimation(core_dict)
         elif core_dict['visual'] == 'confidence':
@@ -54,4 +52,4 @@ def runbanditvis():
     stop_time = time.clock()
     m, s = divmod(stop_time - start_time, 60)
     h, m = divmod(m, 60)
-    print ("Runtime: {:d}h {:d}m {:.3f}s".format(int(h), int(m), s))
+    print ("\nRuntime: {:d}h {:d}m {:.3f}s".format(int(h), int(m), s))

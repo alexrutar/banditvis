@@ -82,12 +82,12 @@ def VarPlot(core_dict):
     # labels / text
     legend = plt.legend(loc='best', framealpha = 1.0)
     legend.get_frame().set_linewidth(1)
-    plt.xlabel('Delta')
-    plt.ylabel('Regret')
+    plt.xlabel(core_dict['xlabel'])
+    plt.ylabel(core_dict['ylabel'])
     plt.title(core_dict['PlotTitle'], style='italic')
 
     # save plot
-    _safe_plot_save(core_dict['PlotSavein'])
+    _safe_plot_save(core_dict['PlotSave'])
 
     return None
 

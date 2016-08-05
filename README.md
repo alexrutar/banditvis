@@ -2,7 +2,7 @@
 _IN PROGRESS_
 
 This Bandit Visualization module provides an easy-to-use library for implementing and visualizing various Bandit algorithms and environments in machine learning. If you are looking for the following, this library is not for you:
-- You want something fast and efficient,
+- You want something fast and efficient
 - You want a tool to run very large simulations
 
 It is good to use if you want to
@@ -78,10 +78,60 @@ Here is an example of a histogram file:
 
 The histogram file runs a certain number of simulations (cycles) and produces a histogram plot with regret on the x-axis and frequency on the y-axis. It can support an arbitrary number of histograms, but anything more than three becomes very challenging to read.
 
-The `PlotTitle` argument provides a name for your file. If it is left blank, the program will use the `PlotSave` name split at the period.
+The `PlotTitle` argument provides a name for your file. If it is left blank, the program will use the `PlotSave` name split at the period. The `PlotSave` argument provides the name under which to save the file; if left blank, it defaults to "temp.pdf".
 
 If Animate is set to True, an animation window will open and display a live build of the first simulation histogram as it runs, and will continue to run the simulation on a different process. If you close the animation window, the program will still run to completion and save the graph.
 ### The `Variable` init
+    init: Variable
+
+    Var:
+        # you can pass arguments like this, and it does linear sampling for you
+        domain: [0.01, 0.29]
+        samples: 10
+
+        # or you can pass arguments explicitly:
+        # args: [0.01, 0.07, 0.09, 0.16]
+
+    horizon: 500
+    cycles: 1000
+
+    xlabel: "Delta"
+    ylabel: "Regret"
+
+    Simulation 1:
+        Algorithm:
+            algtype: TS_Gauss
+        Bandit:
+            ArmList:
+            - [Normal, [0.3 - &&, 1]]
+            - [Normal, [0.3, 1]]
+        label: "TS Gauss"
+
+    Simulation 2:
+        Algorithm:
+            algtype: UCB
+            incr: B7
+            alpha: 2.0
+        Bandit:
+            ArmList:
+            - [Normal, [0.3 - &&, 1  ]]
+            - [Normal, [0.3, 1]]
+        label: "UCB - B7"
+
+    Simulation 3:
+        Algorithm:
+            algtype: Bayes_Gauss
+            incr: B1
+        Bandit:
+            ArmList:
+            - [Normal, [0.3 - &&, 1]]
+            - [Normal, [0.3, 1]]
+        label: "Bayes_Gauss"
+
+    PlotSave: "vari_example.pdf"
+    PlotTitle: "UCB (B7) vs TS Gauss vs Bayes Gauss -- Normal (0.3, 0.3 - Delta) -- Horizon (500)"
+
+
 ### The `Visualize` init
 ### Additional Features
 Here is a list of currently supported additional features:
@@ -118,7 +168,7 @@ Algorithms describe the behaviour of the bandit arm-choosing behaviour. Here is 
 - `Bayes_Gauss`:
   - Bandit Support: Normal
   - init Support: Histogram, Variable, Visualize {confidence}
-  - Additional Arguments: none
+  - Additional Arguments: incr
 - `TS_Beta`:
   - Bandit Support: Bernoullli
   - init Support: Histogram, Variable

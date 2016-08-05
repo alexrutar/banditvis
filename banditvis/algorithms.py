@@ -134,26 +134,25 @@ def Bayes_Gauss(bandit, var_dict):
     def ncdf(x, mu, sigma):
         return(1.0 / (1+np.e**(-0.07056*((x-mu)/(sigma))**3 - 1.5976*((x-mu)/(sigma)))))
     index_type = var_dict['incr']
-    mask = bandit.T == 0
 
-    bandit.T[mask] += 100000
+    precision = 1.0 / bandit.horizon[0]
+    for i, (num, pulls, index) in enumerate(zip(bandit.U, bandit.T, index_type(bandit))):
 
-    init = bandit.U
-    precision = 1.0 / bandit.horizon
-    mu = bandit.U
-    sigma = np.sqrt(1.0/bandit.T)
+        if pulls == 0:
+            bandit.U_conf[i] = 100000
 
-    init = bandit.U
+        init = num
+        mu = num
+        sigma = np.sqrt(1.0/pulls)
 
+        n = 1
+        while n > precision or n * (-1) > precision:
+            n = (ncdf(init, mu, sigma) - (1-1/index))/npdf(init, mu, sigma)
+            init = init - n
 
-    bandit.U = bandit.U - (ncdf(bandit.U, mu, sigma) - (1-1/index_type(bandit)))/npdf(bandit.U, mu, sigma)
-    n = 1
-    while n > precision or n * (-1) > precision:
-        n = (ncdf(init, mu, sigma) - (1-1/index_type(arm, bandit)))/npdf(init, mu, sigma)
-        init = init - n
-    bandit.U_conf[arm] = init
+        bandit.U_conf[i] = init
 
-    return 0
+    return np.argmax(bandit.U_conf)
 
 def TS_Beta(bandit, var_dict):
     """
@@ -167,7 +166,7 @@ def TS_Beta(bandit, var_dict):
     """
     return np.argmax(np.random.beta(bandit.arm_reward + 1, bandit.T - bandit.arm_reward + 1))
 
-def TS_Gauss(arm, bandit, var_dict):
+def TS_Gauss(bandit, var_dict):
     """
     Gaussian Thompson Sampling algorithm
 
@@ -179,7 +178,7 @@ def TS_Gauss(arm, bandit, var_dict):
     """
     mask = bandit.T == 0
     bandit.U_conf[mask] += 100000
-    bandit.U_conf[invert(mask)] = np.random.normal(
+    bandit.U_conf[np.invert(mask)] = np.random.normal(
         bandit.U,
         np.sqrt(1.0/bandit.T))
     return np.argmax(bandit.U_conf)
