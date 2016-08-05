@@ -1,29 +1,22 @@
-# Bandit Visualization Documentation
 _IN PROGRESS_
 
-  * [Bandit Visualization Documentation](#bandit-visualization-documentation)
-    * [Usage Tutorial](#usage-tutorial)
-      * [Running Files](#running-files)
-      * [Minilanguage Syntax](#minilanguage-syntax)
-      * [The Histogram init](#the-histogram-init)
-      * [The Variable init](#the-variable-init)
-      * [The Visualize init](#the-visualize-init)
-      * [Additional Features](#additional-features)
-    * [Argument Summary](#argument-summary)
-      * [The Simulation Class](#the-simulation-class)
-        * [The Algorithm Sub-Class](#the-algorithm-sub-class)
-        * [The Bandit Sub-Class](#the-bandit-sub-class)
-        * [Additional Arguments](#additional-arguments)
-    * [Further Details](#further-details)
-      * [Overall File Structure](#overall-file-structure)
-      * [The <em>Build</em> Directory](#the-build-directory)
-        * [Build/Core](#buildcore)
-        * [Build/Parse](#buildparse)
-        * [Build/DataGen](#builddatagen)
-        * [Build/Plot](#buildplot)
-      * [Rules](#rules)
-        * [Multiprocessor Rules](#multiprocessor-rules)
-      * [Notes](#notes)
+  * [Usage Tutorial](#usage-tutorial)
+    * [Running Files](#running-files)
+    * [Minilanguage Syntax](#minilanguage-syntax)
+    * [The Histogram init](#the-histogram-init)
+    * [The Variable init](#the-variable-init)
+    * [The Visualize init](#the-visualize-init)
+    * [Additional Features](#additional-features)
+  * [Argument Summary](#argument-summary)
+    * [The Simulation Class](#the-simulation-class)
+      * [The Algorithm Sub-Class](#the-algorithm-sub-class)
+      * [The Bandit Sub-Class](#the-bandit-sub-class)
+      * [Additional Arguments](#additional-arguments)
+  * [Further Details](#further-details)
+    * [Overall File Structure](#overall-file-structure)
+    * [Rules](#rules)
+      * [Multiprocessor Rules](#multiprocessor-rules)
+    * [Notes](#notes)
 
 This Bandit Visualization module provides an easy-to-use library for implementing and visualizing various Bandit algorithms and environments in machine learning. If you are looking for the following, this library is not for you:
 - You want something fast and efficient
@@ -41,11 +34,11 @@ The library is implemented in python3. This library is dependent also on the fol
 - scipy (stats)
 - matplotlib (creating graphs)
 
-## Usage Tutorial
-### Running Files
+# Usage Tutorial
+## Running Files
 Input files are placed in the *Input* directory, and are run using `python3 run.py file_name.txt`, where `file_name.txt` is the input file in minilanguage syntax. When the simulation runs, it will either place an Output file in the *Output* directory, under the name you specified, or it will open an animation window. Because of a `matplotlib` issue, the animation may open behind the terminal window in some situations; running the terminal in full screen should avoid this.
 
-### Minilanguage Syntax
+## Minilanguage Syntax
 The first line of the file always contains an `init: ` plus a declaration. Here are three types of supported declarations right now, with a brief description of each:
 - `Histogram` : makes a histogram, aggregating the regret from a large number of simulations
 - `Variable` : makes a line plot, varying a user-controlled parameter
@@ -63,7 +56,7 @@ There are also other various arguments, such as `PlotTitle`, `PlotSave`, and `An
 
 Comments are done python-style with a hash (`#`), and whitespace and blank lines are conveniently ignored. For file examples, see the following three sections.
 
-### The `Histogram` init
+## The `Histogram` init
     init: Histogram  # comments done python-style
 
     horizon: 500
@@ -102,7 +95,7 @@ The `PlotTitle` argument provides a name for your file. If it is left blank, the
 
 If Animate is set to True, an animation window will open and display a live build of the first simulation histogram as it runs, and will continue to run the simulation on a different process. If you close the animation window, the program will still run to completion and save the graph.
 
-### The `Variable` init
+## The `Variable` init
     init: Variable
 
     Var:
@@ -160,8 +153,8 @@ In the example shown, the mean of each Normal arm varies between 0.01 and 0.29, 
 
 **Warning: Variable plots use `eval` to evaluate the `&&` substitutions. This results in arbitrarily increased power for good (you can use numpy functions, etc.) but it also means that it can evaluate almost anything!**
 
-### The `Visualize` init
-### Additional Features
+## The `Visualize` init
+## Additional Features
 Here is a list of currently supported additional features:
 - Error Checking: YAML does the syntax error checking if you have mistyped arguments. There is also a small error parser which tries to catch argument-based errors and inconsistent declarations.
 - Data Saving: The data generated is saved in the Data folder, in a subfolder named using the first four letters of the `init` and a timestamp created when you start the program.
@@ -169,9 +162,9 @@ Here is a list of currently supported additional features:
 Here is a list of features that will be implemented in the future:
 - Multiprocessing Control: You can specify how many cores you want to use using the `Cores` argument, and it will open the appropriate number of processes to generate the data. This feature is incompatible with the `Animate` argument.
 
-## Argument Summary
-### The `Simulation` Class
-#### The `Algorithm` Sub-Class
+# Argument Summary
+## The `Simulation` Class
+### The `Algorithm` Sub-Class
 Algorithms describe the behaviour of the bandit arm-choosing behaviour. Here is a list of the currently supported algorithms (called using `algtype`), with description, compatibility, and additional arguments needed as support:
 - `random`:
   - Bandit Support: Bernoulli, Normal
@@ -214,16 +207,16 @@ Algorithms describe the behaviour of the bandit arm-choosing behaviour. Here is 
   - init Support: Histogram, Variable, Visualize {ellipse}
   - Additional Arguments: none
 
-#### The `Bandit` Sub-Class
-#### Additional Arguments
+### The `Bandit` Sub-Class
+### Additional Arguments
 The simulation class currently has the following additional arguments:
 - `Label`: This is the label used for the Legend, to mark your plot.
-### Additional Arguments
-### Example Files
+## Additional Arguments
+## Example Files
 Example files can be found in the Example folder. It contains a semi-comprehensive overview of what this program can do.
 
 
-## Further Details
+# Further Details
 The *Build* folder countains five sub-folders:
 - Core: Underlying Bandit algorithms and environment
 - Parse: Take a user input file (see minilanguage syntax) and builds a dictionary of values
@@ -237,20 +230,14 @@ Here is an overview of what the program does:
 - Now that the dictionary is finished, it will no longer be modified. It is passed as an argument to the various functions in the *DataGen* module, depending on the type of data that is desired, then passed to the *Plot* module to make various plots. *Histogram* and *Variable* plots depend on generated or existing data to build the plots.
 - For animations, the bandit is run inline using an update function, without generating external data.
 
-### Overall File Structure
+## Overall File Structure
 _(note: the current file structure is temporary and bound to change)_
 
-### The _Build_ Directory
-#### Build/Core
-#### Build/Parse
-#### Build/DataGen
-#### Build/Plot
-
-### Rules
-#### Multiprocessor Rules
+## Rules
+### Multiprocessor Rules
 
 
-### Notes
+## Notes
 The critical importance of core_dict
     everything is stored here; during run.py, it is made by calling Parse on some input file
     once the core_dict is made, you NEVER change it; if you need a local version make a deepcopy
