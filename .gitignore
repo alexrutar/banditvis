@@ -4,3 +4,4 @@ Output/*
 gh-md-toc
 !Data/info.txt
 !Output/info.txt
+__pycache__

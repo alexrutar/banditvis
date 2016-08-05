@@ -81,6 +81,7 @@ def _defaults(core_dict):
             sub_dict.setdefault('NoAxesTick', False)
             sub_dict.setdefault('HelpLines', True)
             sub_dict.setdefault('FPS', 20)
+            sub_dict.setdefault('LevelCurves', True)
         if sub_dict['Bandit']['ArmList'][0][0] == 'Linear':
             sub_dict.setdefault('Normalized', False)
     return None

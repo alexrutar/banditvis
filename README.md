@@ -191,7 +191,7 @@ The ellipse visualization takes a 2D linear bandit; when run, it displays the ar
 - `NoAxesTick`: Option the plot easier to view. If True it removes axes ticks and labels. Defaults to False.
 - `HelpLines`: display extension of the mean vector, and perpindicular projections of the arm vectors onto it to see the mean reward that would be recieved from a given arm. Defaults to True.
 - `FPS`: Control the animation update rate. If the animation is running too slowly on your computer, you can decrease this number. Defults to 20.
-- `LevelCurves`: For the Linear Thomson Sampling algorithm, you can set this to True and it will display level curves. It is meaningless in any other situation.
+- `LevelCurves`: For the Lin_TS algorithm, it will display level curves. It is meaningless in any other situation. Defaults to True.
 
 ### The `confidence` visual
     init: Visualize
