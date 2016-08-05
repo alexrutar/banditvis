@@ -3,10 +3,10 @@ from pprint import pprint
 import sys
 import time
 
-from Build.Parse.text_parse import Parse
-from Build.Plot.BuildGraph import makeHist, makeVar
-from Build.DataGen.BuildData import HistData, VarData
-from Build.Plot.Animation import HistAnimation, EllipseAnimation
+from banditvisualisation.parse import Parse
+from banditvisualisation.plot import makeHist, makeVar
+from banditvisualisation.data import HistData, VarData
+from banditvisualisation.animation import HistAnimation, EllipseAnimation
 
 if __name__ == '__main__':
     start_time = time.clock()

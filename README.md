@@ -76,11 +76,22 @@ Here is an example of a histogram file:
     PlotSave: "example.pdf"
     Animate: False
 
-The histogram file runs a certain number of simulations (cycles) and produces a histogram plot with regret on the x-axis and frequency on the y-axis. If animate is set to True, an animation window will open and display a live build of the histogram
+The histogram file runs a certain number of simulations (cycles) and produces a histogram plot with regret on the x-axis and frequency on the y-axis. It can support an arbitrary number of histograms, but anything more than three becomes very challenging to read.
+
+The `PlotTitle` argument provides a name for your file. If it is left blank, the program will use the `PlotSave` name split at the period.
+
+If Animate is set to True, an animation window will open and display a live build of the first simulation histogram as it runs, and will continue to run the simulation on a different process. If you close the animation window, the program will still run to completion and save the graph.
 ### The `Variable` init
 ### The `Visualize` init
+### Additional Features
+Here is a list of currently supported additional features:
+- Error Checking: YAML does the syntax error checking if you have mistyped arguments. There is also a small error parser which tries to catch argument-based errors and inconsistent declarations.
+- Data Saving: The data generated is saved in the Data folder, in a subfolder named using the first four letters of the `init` and a timestamp created when you start the program.
+- Safe Plot Saving: When you specify a plot name, the program attempts to save it without overwriting another file by appending a number to the file name. If you want the existing file under the name to be overwritten, start your file name with `temp`, eg. `temp_plot.pdf` and the program will overwrite any existing file with the same name.
+Here is a list of features that will be implemented in the future:
+- Multiprocessing Control: You can specify how many cores you want to use using the `Cores` argument, and it will open the appropriate number of processes to generate the data. This feature is incompatible with the `Animate` argument.
 
-
+## Argument Summary
 ### The `Simulation` Class
 #### The `Algorithm` Sub-Class
 Algorithms describe the behaviour of the bandit arm-choosing behaviour. Here is a list of the currently supported algorithms (called using `algtype`), with description, compatibility, and additional arguments needed as support:
@@ -126,8 +137,10 @@ Algorithms describe the behaviour of the bandit arm-choosing behaviour. Here is 
   - Additional Arguments: none
 
 #### The `Bandit` Sub-Class
-### Additional Arguments and Features
-
+#### Additional Arguments
+The simulation class currently has the following additional arguments:
+- `Label`: This is the label used for the Legend, to mark your plot.
+### Additional Arguments
 ### Example Files
 Example files can be found in the Example folder. It contains a semi-comprehensive overview of what this program can do.
 
