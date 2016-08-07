@@ -52,10 +52,10 @@ def VarPlot(core_dict):
     plt.rcParams['figure.titlesize'] = 12
     plt.rcParams['font.size'] = 10
     plt.rcParams['axes.labelsize'] = 10
-    plt.rcParams['axes.labelweight'] = 'bold'
+    plt.rcParams['axes.labelweight'] = 'normal'
     plt.rcParams['lines.linewidth'] = 1
     plt.rcParams['axes.titlesize'] = 'medium'
-    plt.rcParams['axes.titleweight'] = 'bold'
+    plt.rcParams['axes.titleweight'] = 'medium'
     plt.rcParams['legend.edgecolor'] = '#e6e6e6'
     plt.rcParams['legend.facecolor'] = '#ffffff'
 
@@ -118,7 +118,7 @@ def HistPlot(core_dict):
     plt.rcParams['font.size'] = 10
     plt.rcParams['axes.labelsize'] = 10
     plt.rcParams['axes.titlesize'] = 'medium'
-    plt.rcParams['axes.titleweight'] = 'bold'
+    plt.rcParams['axes.titleweight'] = 'medium'
     plt.rcParams['legend.edgecolor'] = '#e6e6e6'
     plt.rcParams['legend.facecolor'] = '#ffffff'
 

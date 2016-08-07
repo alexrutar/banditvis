@@ -123,7 +123,7 @@ def ConfAnimation(core_dict):
     # plot variables
     sim = core_dict['sim'][0]['Simulation']
     arms = sim.bandit.n_arms
-    title = "Upper Confidence Animation"
+    title = "Upper Confidence Animation\n"
     not_picked_color = plt.cm.get_cmap('BuGn')(0.6)
     picked_color = plt.cm.get_cmap('OrRd')(0.6)
     x_labels = ["Mean: "+str(item) for item in sim.bandit.mean_list]

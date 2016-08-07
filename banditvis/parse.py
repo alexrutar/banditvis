@@ -71,6 +71,7 @@ def _defaults(core_dict):
             "Data/{}".format(core_dict['init'][:4] + " " + datetime.strftime(
                 datetime.now(), '%Y-%m-%d %H_%M_%S')))
         core_dict.setdefault('Animate', False)
+        core_dict.setdefault('FPS', 20)
         core_dict.setdefault('PlotSave', "temp.pdf")
     if core_dict['init'] == 'Variable':
         core_dict.setdefault('ylabel', 'Regret')
