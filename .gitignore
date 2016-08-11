@@ -1,7 +1,6 @@
 *.DS_Store
-Data/*
-Input/*
-Output/*
-!Data/.info.txt
-!Output/.info.txt
+Data
+Input
+Output
 __pycache__
+interface.py

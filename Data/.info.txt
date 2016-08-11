@@ -1,1 +1,0 @@
-Data files from running simulations will end up in this directory

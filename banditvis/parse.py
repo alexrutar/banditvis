@@ -184,18 +184,18 @@ class _check:
                 if not item:
                     cntr += 1
             if cntr != 0:
-                self.errors += "\n- ({0}) was not declared at the top level, "
+                self.errors += ("\n- ({0}) was not declared at the top level, "
                     "and you are missing a ({0}) declaration in ({1}) "
-                    "simulation(s)".format(name, cntr)
+                    "simulation(s)".format(name, cntr))
         else:
             cntr = 0
             for item in checklist['low_{}'.format(name)]:
                 if item:
                     cntr += 1
             if cntr != 0:
-                self.errors += "\n- ({0}) was declared at the top level, but "
+                self.errors += ("\n- ({0}) was declared at the top level, but "
                 "you have ({0}) declarations in ({1}) simulation(s).".format(
-                    name, cntr)
+                    name, cntr))
             else:
                 for sub_dict in self.initial_dict['sim']:
                     sub_dict['{}'.format(name)] = \
@@ -216,8 +216,8 @@ class _check:
                 checklist['low_{}'.format(name)][i] = True
         if (checklist['low_{}'.format(name)]
             != [True] * len(self.initial_dict['sim'])):
-            self.errors += "\n- You are missing at least one simulation ({}) "
-                "declaration.".format(name)
+            self.errors += ("\n- You are missing at least one simulation ({}) "
+                "declaration.".format(name))
         return None
 
 
@@ -282,12 +282,12 @@ class _check:
             checklist['args'] = True
 
         if checklist['linspace'] and checklist['args']:
-            self.errors += "\n- Declare either (domain and samples) or (args),"
-                " not both."
+            self.errors += ("\n- Declare either (domain and samples) or (args)"
+                ", not both.")
 
         elif not checklist['linspace'] and not checklist['args']:
-            self.errors += "\n- You must declare either (domain and samples) "
-                "or (args)."
+            self.errors += ("\n- You must declare either (domain and samples) "
+                "or (args).")
         else:
             try:
                 self.initial_dict['arg_list'] = np.linspace(

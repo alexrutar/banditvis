@@ -1,1 +1,0 @@
-Out files and plots are placed in this directory.

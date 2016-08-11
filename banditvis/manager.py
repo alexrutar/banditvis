@@ -1,7 +1,6 @@
 from multiprocessing import Process
 from pprint import pprint
 import sys
-import time
 
 from .parse import Parse
 from .plot import *
@@ -9,6 +8,9 @@ from .data import *
 from .animation import *
 
 def _getInput():
+    """
+    Gets the input from the user commmand and checks it for potential errors.
+    """
     try:
         if sys.argv[1].endswith('.txt'):
             input_file = sys.argv[1]
@@ -17,18 +19,15 @@ def _getInput():
     except IndexError:
         sys.exit("ERROR: You need to specify a file.")
     try:
-        core_dict = Parse("Input/{}".format(input_file))  # builds an initial dictionary of values
+        core_dict = Parse("{}".format(input_file))
     except FileNotFoundError:
-        sys.exit("ERROR: The file you tried to input doesn't exist in the current directory.")
-
+        sys.exit("ERROR: The file you tried to input doesn't exist in the "
+            "current directory.")
     return core_dict
-def banditvis():
 
+
+def run():
     core_dict = _getInput()
-
-    start_time = time.clock()
-
-
 
     print("\n\n--Completed core_dict--\n\n")
     pprint(core_dict)
@@ -42,7 +41,6 @@ def banditvis():
                 HistAnimation(core_dict)
             p1.join()  # holds main() until p1 is done
         HistPlot(core_dict)
-
 
     elif core_dict['init'] == 'Variable':
         if not core_dict['InputData']:
@@ -59,7 +57,5 @@ def banditvis():
         elif core_dict['visual'] == 'distribution':
             DistAnimation(core_dict)
 
-    stop_time = time.clock()
-    m, s = divmod(stop_time - start_time, 60)
-    h, m = divmod(m, 60)
-    print ("\nRuntime: {:d}h {:d}m {:.3f}s".format(int(h), int(m), s))
+
+
