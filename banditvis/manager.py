@@ -8,9 +8,7 @@ from .plot import *
 from .data import *
 from .animation import *
 
-def banditvis():
-    start_time = time.clock()
-
+def _getInput():
     try:
         if sys.argv[1].endswith('.txt'):
             input_file = sys.argv[1]
@@ -23,23 +21,34 @@ def banditvis():
     except FileNotFoundError:
         sys.exit("ERROR: The file you tried to input doesn't exist in the current directory.")
 
+    return core_dict
+def banditvis():
+
+    core_dict = _getInput()
+
+    start_time = time.clock()
+
+
+
     print("\n\n--Completed core_dict--\n\n")
     pprint(core_dict)
     print("--\n\n")
 
     if core_dict['init'] == 'Histogram':
-        p1 = Process(target=HistData, args=(core_dict, ))
-        p1.start()
-        if core_dict['Animate']:
-            HistAnimation(core_dict)
-        p1.join()  # holds main() until p1 is done
+        if not core_dict['InputData']:
+            p1 = Process(target=HistData, args=(core_dict, ))
+            p1.start()
+            if core_dict['Animate']:
+                HistAnimation(core_dict)
+            p1.join()  # holds main() until p1 is done
         HistPlot(core_dict)
 
 
     elif core_dict['init'] == 'Variable':
-        p1 = Process(target=VarData, args=(core_dict, ))
-        p1.start()
-        p1.join()
+        if not core_dict['InputData']:
+            p1 = Process(target=VarData, args=(core_dict, ))
+            p1.start()
+            p1.join()
         VarPlot(core_dict)
 
     elif core_dict['init'] == 'Visualize':
