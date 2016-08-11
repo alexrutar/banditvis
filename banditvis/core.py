@@ -68,9 +68,9 @@ class Bandit:
         self.total_reward = 0
         self.arm_reward = np.zeros(self.n_arms, dtype=np.int)
 
-        self.mean_list = []
-        for arm in range(self.n_arms):
-            self.mean_list.append(self.arms[arm].mean)
+        self.mean_list = np.array([self.arms[arm].mean
+            for arm in range(self.n_arms)])
+
 
 
     def giveRegret(self):

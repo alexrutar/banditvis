@@ -5,8 +5,10 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import matplotlib.patches as mpatches
+from scipy.stats import beta
 
 from .simulation import ReMapSim
+from .formatting import cmap_colors, mpl_defaults
 
 
 def HistAnimation(core_dict):
@@ -20,18 +22,11 @@ def HistAnimation(core_dict):
     """
 
     # defaults
-    plt.style.use('bmh')
-    mpl.rcParams['toolbar'] = 'None'
-    plt.rcParams['font.size'] = 12
-    plt.rcParams['xtick.labelsize'] = 12
-    plt.rcParams['ytick.labelsize'] = 12
-    plt.rcParams['legend.fontsize'] = 12
+    mpl_defaults.ani()
+
     plt.rcParams['figure.titlesize'] = 14
     plt.rcParams['font.size'] = 12
     plt.rcParams['axes.labelsize'] = 13
-    plt.rcParams['axes.labelweight'] = 'bold'
-    plt.rcParams['legend.edgecolor'] = '#e6e6e6'
-    plt.rcParams['legend.facecolor'] = '#ffffff'
 
     # plot variables
     cmap1 = plt.cm.get_cmap('BuGn')
@@ -103,19 +98,7 @@ def ConfAnimation(core_dict):
     """
 
     # defaults
-    mpl.rcParams['toolbar'] = 'None'
-    plt.style.use('bmh')
-    plt.rcParams['font.size'] = 12
-    plt.rcParams['xtick.labelsize'] = 12
-    plt.rcParams['ytick.labelsize'] = 12
-    plt.rcParams['legend.fontsize'] = 12
-    plt.rcParams['figure.titlesize'] = 12
-    plt.rcParams['font.size'] = 10
-    plt.rcParams['axes.labelsize'] = 12
-    plt.rcParams['axes.labelweight'] = 'bold'
-    plt.rcParams['axes.labelweight'] = 'bold'
-    plt.rcParams['legend.edgecolor'] = '#e6e6e6'
-    plt.rcParams['legend.facecolor'] = '#ffffff'
+    mpl_defaults.ani()
 
     # map the core_dict to actual objects
     ReMapSim(core_dict['sim'][0])
@@ -126,7 +109,6 @@ def ConfAnimation(core_dict):
     title = "Upper Confidence Animation\n"
     not_picked_color = plt.cm.get_cmap('BuGn')(0.6)
     picked_color = plt.cm.get_cmap('OrRd')(0.6)
-    x_labels = ["Mean: "+str(item) for item in sim.bandit.mean_list]
     bar_width = 0.45
 
     # simulation variables
@@ -157,7 +139,7 @@ def ConfAnimation(core_dict):
 
         # clear plot to redraw
         plt.cla()
-
+        x_labels = ["Pulls: "+str(item) for item in sim.bandit.T]
         # make a bar plot
         bar_list = plt.bar(index, confidence, bar_width,
             align='center',
@@ -185,7 +167,7 @@ def ConfAnimation(core_dict):
                 ls='dashed',
                 mfc='white')
 
-        # add dotted lines for the system mean of each arm
+        # add dotted lines for the empirical mean of each arm
         for i in range(sim.bandit.n_arms):
             x = [i - bar_width/2, i + bar_width/2]
             y = [sim.bandit.U[i], sim.bandit.U[i]]
@@ -214,7 +196,7 @@ def ConfAnimation(core_dict):
         dashdot_label, = plt.plot([], [],
             ls="-",
             linewidth=1.0,
-            label="System Mean",
+            label="Empirical Mean",
             color='black')
         legend_1 = plt.legend(
             handles=[picked_color_path, not_picked_color_path, dash_label, dashdot_label],
@@ -260,21 +242,8 @@ def EllipseAnimation(core_dict):
     """
 
     # defaults
-    mpl.rcParams['toolbar'] = 'None'
-    plt.style.use('bmh')
-    plt.rcParams['font.size'] = 12
-    plt.rcParams['xtick.labelsize'] = 10
-    plt.rcParams['ytick.labelsize'] = 10
-    plt.rcParams['legend.fontsize'] = 12
-    plt.rcParams['figure.titlesize'] = 12
-    plt.rcParams['font.size'] = 10
-    plt.rcParams['axes.labelsize'] = 12
-    plt.rcParams['axes.labelweight'] = 'bold'
-    plt.rcParams['axes.labelweight'] = 'bold'
-    plt.rcParams['legend.edgecolor'] = '#e6e6e6'
-    plt.rcParams['legend.facecolor'] = '#ffffff'
-    plt.rcParams['legend.numpoints'] = 1
-
+    fig, ax = mpl_defaults.ani()
+    ax.set_aspect('equal')
     # map the core_dict sim to actual objects
     ReMapSim(core_dict['sim'][0])
 
@@ -284,7 +253,8 @@ def EllipseAnimation(core_dict):
     arms = sim.bandit.arm_vecs
     mean = np.array(sim.bandit.mean)
     horizon = core_dict['horizon']
-    title = "2D Confidence Ellipse Animation"
+    title = "2D Confidence Ellipse Animation\n"
+
     # the locations of the perpindicular projection of the arm vector onto the
     # mean vector
     projs = np.array(
@@ -301,14 +271,13 @@ def EllipseAnimation(core_dict):
     x_margin = (x_max-x_min)
     y_margin = (y_max-y_min)
     x_max += x_margin/3
-    x_min -= x_margin/5  # less margin on right
+    x_min -= x_margin/5  # less margin on left
     y_max += y_margin/3
     y_min -= y_margin/5  # less margin at bottom
 
     # set up the figure and axes
-    fig = plt.figure(figsize=(14,9), facecolor='white')
-    ax = fig.add_subplot(111, axisbg='white')
-    ax.set_aspect('equal')
+    # fig = plt.figure(figsize=(14,9), facecolor='white')
+    # ax = fig.add_subplot(111, axisbg='white')
 
     # initialize the bandit
     for i in range(sim.bandit.n_arms):
@@ -383,8 +352,7 @@ def EllipseAnimation(core_dict):
                 alpha=0.65 ))
 
         # format the axes
-        ax.spines['right'].set_color('none')
-        ax.spines['top'].set_color('none')
+        ax.spines['left'].set_visible(True)
         ax.xaxis.set_ticks_position('bottom')
         ax.spines['bottom'].set_position(('data',0))
         ax.yaxis.set_ticks_position('left')
@@ -479,5 +447,104 @@ def EllipseAnimation(core_dict):
     my_ani = animation.FuncAnimation(fig, _update,
         fargs=(sim.bandit.U_conf, ),
         interval=1000/core_dict['FPS'])  # fargs is used as the data required in update_hist
+
+    plt.show()
+
+
+def DistAnimation(core_dict):
+    """
+    Creates an animation of the distributions used for beta and gaussian
+    random sampling and confidence algorithms.
+    """
+    # defaults
+    fig, ax = mpl_defaults.ani()
+
+
+    ReMapSim(core_dict['sim'][0])
+
+    # simulation variables
+    sim = core_dict['sim'][0]['Simulation']
+    sim_dict = core_dict['sim'][0]
+    horizon = core_dict['horizon']
+    n_arms = sim.bandit.n_arms
+    title = "Distribution Animation\n"
+    if sim.alg.var_dict['algtype'].__name__[-5:] == 'Gauss':
+        xlims = [np.amin(sim.bandit.mean_list) - 1.5,np.amax(sim.bandit.mean_list) + 1.5]
+    elif sim.alg.var_dict['algtype'].__name__[-4:] == 'Beta':
+        xlims = [0,1]
+
+    for i in range(sim.bandit.n_arms):
+        sim.bandit.pullArm(i)
+
+    # distribution function
+    def npdf(x, mu, sigma):
+        return 0.39894228 / sigma * 0.60653066**(((x-mu)/(sigma))**2)
+
+    # the animation update function
+    def _update(num, confidence):
+        nonlocal ax
+        plt.cla()
+
+        # step the bandit
+        sim.runStep(1, horizon)
+        samples = 500
+        xdata = np.tile(np.linspace(xlims[0], xlims[1], samples), (n_arms,1))
+        if sim.alg.var_dict['algtype'].__name__[-5:] == 'Gauss':
+            mu = np.tile(
+                sim.bandit.U.reshape(n_arms,1),
+                (1,samples))
+            sigma = np.tile(
+                np.sqrt(1.0/sim.bandit.T).reshape(n_arms,1),
+                (1,samples))
+            ydata = npdf(xdata, mu, sigma)
+
+        elif sim.alg.var_dict['algtype'].__name__[-4:] == 'Beta':
+            beta_a = np.tile(
+                (sim.bandit.arm_reward+1).reshape(n_arms,1),
+                (1,samples))
+            beta_b = np.tile(
+                (sim.bandit.T - sim.bandit.arm_reward + 1).reshape(n_arms,1),
+                (1,samples))
+            ydata = beta.pdf(xdata, beta_a, beta_b)
+
+        ydata_max = np.amax(ydata, axis=1)
+        ymax = np.maximum(3, np.amax(ydata_max)*1.1)
+        v_line_max = np.minimum(ydata_max/ymax, 1)
+
+        for i in range(n_arms):
+            cmap = cmap_colors.sequential1[i]
+            plt.plot(xdata[i], ydata[i], "-", color=cmap(0.5))
+            ax.fill_between(xdata[i], 0, ydata[i], color=cmap(0.5), alpha=0.2, linewidth=0.5, label="Arm {}: Pulls: {}".format(i+1, sim.bandit.T[i]))
+            plt.axvline(sim.bandit.U[i], ymax=v_line_max[i], ls='dashed', color=cmap(0.8))
+            plt.axvline(sim.bandit.mean_list[i], ymax=1, ls='dashdot', alpha=0.6, color=cmap(0.8))
+
+        ylims = [0, ymax]
+        # general formatting
+        ax.grid(True)
+        ax.set_ylim(ylims)
+        ax.set_xlim(xlims)
+
+        legend = plt.legend(loc='upper right')
+        plt.gca().add_artist(legend)
+        legend.get_frame().set_linewidth(1)
+
+        # additional information legend
+        blank_path_1 = mpatches.Patch(
+            label='Regret: {:04.2f}'.format(sim.bandit.giveRegret()))
+        blank_path_2 = mpatches.Patch(
+            label='Timestep: {:2d}'.format(sim.bandit.timestep[0]))
+        legend_2 = plt.legend(
+            handles=[blank_path_1, blank_path_2],
+            loc='upper left',
+            handlelength=0,
+            handletextpad=0)
+        legend_2.get_frame().set_linewidth(1)
+
+        plt.title(title)
+
+    # the animation declaration
+    my_ani = animation.FuncAnimation(fig, _update,
+        fargs=(sim.bandit.U_conf, ),
+        interval=2000/(core_dict['FPS']))  # fargs is used as the data required in update_hist
 
     plt.show()

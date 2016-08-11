@@ -4,9 +4,9 @@ import sys
 import time
 
 from .parse import Parse
-from .plot import HistPlot, VarPlot
-from .data import HistData, VarData
-from .animation import HistAnimation, EllipseAnimation, ConfAnimation
+from .plot import *
+from .data import *
+from .animation import *
 
 def banditvis():
     start_time = time.clock()
@@ -47,6 +47,8 @@ def banditvis():
             EllipseAnimation(core_dict)
         elif core_dict['visual'] == 'confidence':
             ConfAnimation(core_dict)
+        elif core_dict['visual'] == 'distribution':
+            DistAnimation(core_dict)
 
     stop_time = time.clock()
     m, s = divmod(stop_time - start_time, 60)

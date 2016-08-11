@@ -5,7 +5,7 @@ import numpy as np
 
 from .data import VarData
 from .simulation import ReMapSim
-from .formatting import cmap_colors
+from .formatting import cmap_colors, mpl_defaults
 
 
 def _safe_plot_save(file_name):
@@ -44,26 +44,7 @@ def VarPlot(core_dict):
     """
 
     # defaults
-    plt.style.use('bmh')
-    plt.rcParams['font.size'] = 10
-    plt.rcParams['xtick.labelsize'] = 8
-    plt.rcParams['ytick.labelsize'] = 8
-    plt.rcParams['legend.fontsize'] = 10
-    plt.rcParams['figure.titlesize'] = 12
-    plt.rcParams['font.size'] = 10
-    plt.rcParams['axes.labelsize'] = 10
-    plt.rcParams['axes.labelweight'] = 'normal'
-    plt.rcParams['lines.linewidth'] = 1
-    plt.rcParams['axes.titlesize'] = 'medium'
-    plt.rcParams['axes.titleweight'] = 'medium'
-    plt.rcParams['legend.edgecolor'] = '#e6e6e6'
-    plt.rcParams['legend.facecolor'] = '#ffffff'
-
-    # formatting
-    axes = plt.gca()
-    axes.spines['right'].set_color('none')
-    axes.spines['top'].set_color('none')
-    axes.spines['left'].set_color('none')
+    fig, ax = mpl_defaults.plot()
 
     # add plots
     for i, sub_dict in enumerate(core_dict['sim']):
@@ -72,7 +53,7 @@ def VarPlot(core_dict):
             float)
         x_list = core_dict['arg_list']
 
-        cmap = plt.cm.get_cmap(cmap_colors.sequential1[i])
+        cmap = cmap_colors.sequential1[i]
 
         plt.plot(x_list, y_list,".--",
             linewidth=1,
@@ -109,24 +90,7 @@ def HistPlot(core_dict):
     """
 
     # defaults
-    plt.style.use('bmh')
-    plt.rcParams['font.size'] = 10
-    plt.rcParams['xtick.labelsize'] = 8
-    plt.rcParams['ytick.labelsize'] = 8
-    plt.rcParams['legend.fontsize'] = 10
-    plt.rcParams['figure.titlesize'] = 12
-    plt.rcParams['font.size'] = 10
-    plt.rcParams['axes.labelsize'] = 10
-    plt.rcParams['axes.titlesize'] = 'medium'
-    plt.rcParams['axes.titleweight'] = 'medium'
-    plt.rcParams['legend.edgecolor'] = '#e6e6e6'
-    plt.rcParams['legend.facecolor'] = '#ffffff'
-
-    # formatting
-    axes = plt.gca()
-    axes.spines['right'].set_color('none')
-    axes.spines['top'].set_color('none')
-    axes.spines['left'].set_color('none')
+    fig, ax = mpl_defaults.plot()
 
     # variables
     bins = np.linspace(0, np.amax(core_dict['bins']), num = 90)
@@ -137,7 +101,7 @@ def HistPlot(core_dict):
             "{}/data{}.txt".format(core_dict['data_folder'], i),
             float)
 
-        cmap = plt.cm.get_cmap(cmap_colors.sequential1[i])
+        cmap = cmap_colors.sequential1[i]
 
         avgline = np.average(data)
         plt.axvline(x = avgline, color = cmap(0.5),ls="--" ,linewidth = 1.7)
