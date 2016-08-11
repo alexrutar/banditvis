@@ -1,10 +1,8 @@
-import re
 import sys
 
 import numpy as np
 import yaml
 from datetime import datetime
-from pprint import pprint
 
 from .formatting import bcolors
 
@@ -12,7 +10,8 @@ from .formatting import bcolors
 def Parse(user_file):
     """
     Loads the user_file using YAML and then checks the dictionary for
-    consistency; basic first checks
+    consistency. Once Parse is completed, it either exits with errors or
+    returns a checked core_dict.
     """
 
     # Try to load the file and catch YAML syntax errors for nicer formatting
@@ -70,7 +69,9 @@ def DictCheck(initial_dict):
     """
     The checking function, uses _check class to perform these checks nicely.
 
-    Defaults are built first, followed by checks based on each init file.
+    Defaults are built first, followed by checks based on each init file and
+    other specifics. The full list of checking functions with explanations
+    can be found in the _check class.
     """
     _defaults(initial_dict)
 
@@ -107,21 +108,25 @@ def DictCheck(initial_dict):
 
 
 def _defaults(initial_dict):
-    # -------------------------------------------------------------------------
+    """
+    Builds some default values in the initial_dict.
 
-    # DEFAULTS
-
-    # -------------------------------------------------------------------------
-
+    This is going ot be fixed soon...
+    """
     initial_dict.setdefault('InputData', False)
-    if initial_dict['init'] == 'Histogram' or initial_dict['init'] == 'Variable':
+    if (initial_dict['init'] == 'Histogram'
+        or initial_dict['init'] == 'Variable'):
         # data folder to save data files in; uses a timestamp for a label
         if not initial_dict['InputData']:
             initial_dict.setdefault('data_folder',
-                "Data/{}".format(initial_dict['init'][:4] + " " + datetime.strftime(
-                    datetime.now(), '%Y-%m-%d %H_%M_%S')))
+                "Data/{}".format(
+                    initial_dict['init'][:4]
+                    + " "
+                    + datetime.strftime(
+                        datetime.now(), '%Y-%m-%d %H_%M_%S')))
         else:
-            initial_dict.setdefault('data_folder', "Data/{}".format(initial_dict['InputData']))
+            initial_dict.setdefault('data_folder',
+                "Data/{}".format(initial_dict['InputData']))
         initial_dict.setdefault('Animate', False)
         initial_dict.setdefault('FPS', 20)
         initial_dict.setdefault('PlotSave', "temp.pdf")
@@ -143,7 +148,8 @@ def _defaults(initial_dict):
 
 class _check:
     """
-    A class which checks a dictionary for errors.
+    A class which checks a dictionary for errors. It contains a large number of
+    methods which are convenient / reusable when parsing dictionary objects.
 
     """
 
@@ -158,8 +164,8 @@ class _check:
         """
         Checks if 'name' exists in the sim dictionaries and in the overall
         dictionary; looks for conflict / multiple declarations of name. If
-        there are no self.errors, it moves every instance of the declaration to the
-        simulation subdictionaries for easier access later.
+        there are no errors, it moves every instance of the declaration to
+        the simulation subdictionaries for easier access later.
         """
         checklist = \
             {'low_{}'.format(name) : [False] * len(self.initial_dict['sim']),
@@ -172,51 +178,61 @@ class _check:
             if name in sub_dict.keys():
                 checklist['low_{}'.format(name)][i] = True
 
-        if not checklist['top_{}'.format(name)]:  # if top_horizon isn't declared, low_horizon should be all true
+        if not checklist['top_{}'.format(name)]:
             cntr = 0
             for item in checklist['low_{}'.format(name)]:
                 if not item:
                     cntr += 1
             if cntr != 0:
-                self.errors += "\n- ({0}) was not declared at the top level, and you are missing a ({0}) declaration in ({1}) simulation(s)".format(name, cntr)
+                self.errors += "\n- ({0}) was not declared at the top level, "
+                    "and you are missing a ({0}) declaration in ({1}) "
+                    "simulation(s)".format(name, cntr)
         else:
             cntr = 0
             for item in checklist['low_{}'.format(name)]:
                 if item:
                     cntr += 1
             if cntr != 0:
-                self.errors += "\n- ({0}) was declared at the top level, but you have ({0}) declarations in ({1}) simulation(s).".format(name, cntr)
+                self.errors += "\n- ({0}) was declared at the top level, but "
+                "you have ({0}) declarations in ({1}) simulation(s).".format(
+                    name, cntr)
             else:
                 for sub_dict in self.initial_dict['sim']:
-                    sub_dict['{}'.format(name)] = self.initial_dict['{}'.format(name)]  # fill in all the sub_dictionaries with 'cycles'
+                    sub_dict['{}'.format(name)] = \
+                        self.initial_dict['{}'.format(name)]
                 del self.initial_dict['{}'.format(name)]
         return None
 
 
     def SimExist(self, name):
         """
-        Checks if 'name' exists in every single simulation sub_dictionary, and adds an error if it doesn't
+        Checks if 'name' exists in every single simulation sub_dictionary, and
+        adds an error if it doesn't
         """
-        checklist = {'low_{}'.format(name) :  [False] * len(self.initial_dict['sim'])}
+        checklist = \
+            {'low_{}'.format(name) : [False] * len(self.initial_dict['sim'])}
         for i, sub_dict in enumerate(self.initial_dict['sim']):
             if name in sub_dict.keys():
                 checklist['low_{}'.format(name)][i] = True
-        if checklist['low_{}'.format(name)] != [True] * len(self.initial_dict['sim']):
-            self.errors += "\n- You are missing at least one simulation ({}) declaration.".format(name)
+        if (checklist['low_{}'.format(name)]
+            != [True] * len(self.initial_dict['sim'])):
+            self.errors += "\n- You are missing at least one simulation ({}) "
+                "declaration.".format(name)
         return None
 
 
     def Save(self):
         """
-        Checks the save format for .pdf or .png
+        Checks the save format for .pdf or .png. It returns an error otherwise.
         """
         self.initial_dict.setdefault('PlotSave', 'temp.pdf')
         if ('.pdf' not in self.initial_dict['PlotSave'][-4:]
             and '.png' not in self.initial_dict['PlotSave'][-4:]):
-            self.errors += ("\n- PlotSave: You can only save a plot as a '.pdf' or "
-                "'.png'. PDF is the recommended file type for image quality "
-                "reasons.")
-        self.initial_dict['PlotSave'] = 'Output/' + self.initial_dict['PlotSave']
+            self.errors += ("\n- PlotSave: You can only save a plot as a "
+                "'.pdf' or '.png'. PDF is the recommended file type for image "
+                "quality reasons.")
+        self.initial_dict['PlotSave'] = \
+            'Output/' + self.initial_dict['PlotSave']
         return None
 
 
@@ -228,7 +244,8 @@ class _check:
         self.initial_dict.setdefault('PlotTitle', False)
         if not self.initial_dict['PlotTitle']:
             self.initial_dict['PlotTitle'] = \
-                self.initial_dict['PlotSave'].split("/")[-1].split(".")[0] + "\n"
+                self.initial_dict['PlotSave'].split("/")[-1].split(".")[0] \
+                + "\n"
         else:
             self.initial_dict['PlotTitle'] += "\n"
         return None
@@ -236,7 +253,8 @@ class _check:
 
     def Bins(self):
         """
-        Determines how many bins the histogram should have.
+        Determines how many bins the histogram should have based on the proper-
+        ties of the bandit.
         """
         self.initial_dict['bins'] = []
         for sub_dict in self.initial_dict['sim']:
@@ -251,6 +269,10 @@ class _check:
 
 
     def Args(self):
+        """
+        When using the Variable class, args can be declared in multiple ways.
+        This builds a single list of args out of the inputs to be used later.
+        """
         checklist = {'linspace': False, 'args': False}
         if ('domain' in self.initial_dict['Var'].keys()
             and 'samples' in self.initial_dict['Var'].keys()):
@@ -260,21 +282,23 @@ class _check:
             checklist['args'] = True
 
         if checklist['linspace'] and checklist['args']:
-            self.errors += "\n- Declare either (domain and samples) or (args), not "
-            "both."
+            self.errors += "\n- Declare either (domain and samples) or (args),"
+                " not both."
 
         elif not checklist['linspace'] and not checklist['args']:
-            self.errors += "\n- You must declare either (domain and samples) or "
-            "(args)."
+            self.errors += "\n- You must declare either (domain and samples) "
+                "or (args)."
         else:
             try:
                 self.initial_dict['arg_list'] = np.linspace(
                     self.initial_dict['Var']['domain'][0],
                     self.initial_dict['Var']['domain'][1],
                     self.initial_dict['Var']['samples'])
-                print("hi")
             except KeyError:
                 pass
+
+        # calculate the total number of operations that the Variable class is
+        # going to run through
         t_ops = 0
         for sub_dict in self.initial_dict['sim']:
             t_ops += len(self.initial_dict['arg_list'])
