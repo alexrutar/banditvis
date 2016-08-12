@@ -1,4 +1,5 @@
 import multiprocessing as mp
+import threading as th
 from pprint import pprint
 import sys
 import time
@@ -39,20 +40,40 @@ def _run(proc_list, n_processes):
             process.join()
     return None
 
-
+class _statusThread(th.Thread):
+    def __init__(self, core_dict):
+        super(_statusThread, self).__init__()
+        self.core_dict = core_dict
+        self.n_files = len(core_dict['sim'])
+        self.daemon = True
+        self.total = core_dict['total_lines']
+    def run(self):
+        while True:  # TODO fix this to have a termination
+            time.sleep(0.5)
+            current = 0
+            try:
+                for i in range(self.n_files):
+                    with open("{}/data{}.txt".format(self.core_dict['data_folder'], i), 'r') as file:
+                        current += sum(1 for line in file) - 1
+            except FileNotFoundError:
+                pass
+            sys.stdout.write("\r--  {} % complete --".format(int(current*100/self.total)))
+            sys.stdout.flush()
 def run():
     core_dict = _getInput()
     n_processes = core_dict['Multiprocess']
     # -------------------------------------------------------------------------
-    print("\n\n--Completed core_dict--\n\n")
+    print("\n\nCompleted core_dict\n\n")
     pprint(core_dict)
     print("--\n\n")
     # -------------------------------------------------------------------------
 
     if core_dict['init'] == 'Histogram':
+        status = _statusThread(core_dict)
+        status.start()
         if not core_dict['InputData']:
             proc_list = HistData(core_dict)
-        if core_dict['Animate']:
+        if core_dict['Animate']:  # TODO in general fix this thing
             time.sleep(1)  # TODO fix so that it doesn't try to access an
             # empty
             HistAnimation(core_dict)
@@ -64,6 +85,8 @@ def run():
         HistPlot(core_dict)
 
     elif core_dict['init'] == 'Variable':
+        status = _statusThread(core_dict)
+        status.start()
         if not core_dict['InputData']:
             proc_list = VarData(core_dict)
         _run(proc_list, n_processes)

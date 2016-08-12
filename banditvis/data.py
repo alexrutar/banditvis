@@ -79,15 +79,12 @@ def VarData(core_dict):
     def make(i, sub_dict):
         iter_list = core_dict['arg_list']
         for num in iter_list:  # now num is the variable
-            core_dict['op_n'] += 1
             temp_dict = _fix_vars(sub_dict, num)
 
             ReMapSim(temp_dict)
             sim = temp_dict['Simulation']
 
             file_name = "{}/data{}.txt".format(core_dict['data_folder'], i)
-            sim.total_ops = temp_dict['total_ops']
-            sim.op_n = core_dict['op_n']
             sim.runVar(
                 temp_dict['horizon'],
                 temp_dict['cycles'],

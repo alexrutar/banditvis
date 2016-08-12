@@ -159,8 +159,6 @@ class Simulation:
         self.bandit.horizon = np.full(self.bandit.n_arms, horizon, dtype = int)
         self.horizon = horizon
 
-        print("-"*50 + "\n")
-
         for i in range(cycles):
             for j in range(self.bandit.n_arms):
                 self.bandit.pullArm(j)
@@ -174,12 +172,6 @@ class Simulation:
             with open(out_file, "a") as outfile:
                 outfile.write("{0}\n".format(self.bandit.giveRegret()))
             self.bandit.reset()
-
-            stdout.write(
-                "\r----------  "
-                "{0:d} out of {1} cycles"
-                "----------".format(self.iterations, cycles))
-            stdout.flush()
         return None
 
 
@@ -193,8 +185,6 @@ class Simulation:
         self.bandit.horizon = np.full(self.bandit.n_arms, horizon, dtype = int)
         self.horizon = horizon
 
-        print("-"*50 + "\n")
-
         for i in range(cycles):
             for i in range(self.bandit.n_arms):
                 self.bandit.pullArm(i)
@@ -207,19 +197,8 @@ class Simulation:
 
             self.bandit.reset()
 
-            stdout.write(
-                "\r{0:d} out of {1} cycles "
-                "--"
-                "{2} out of {3} iterations".format(
-                    self.iterations,
-                    cycles,
-                    self.op_n,
-                    self.total_ops))
-            stdout.flush()
-
         with open(out_file, "a") as outfile:
             outfile.write("{0}\n".format(self.total_regret/self.iterations))
-
         return None
 
     def selfCheck(self):
@@ -228,6 +207,7 @@ class Simulation:
         """
         errors = ""
         return errors
+
 class ObjectDict:
     ArmDict = {
         'Bernoulli' : BernoulliArm,

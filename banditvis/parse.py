@@ -89,6 +89,8 @@ def DictCheck(initial_dict):
         check.SimExist('label')
 
         check.Args()
+        initial_dict.setdefault('total_lines', len(initial_dict['sim']) * len(initial_dict['arg_list']))
+
     elif initial_dict['init'] == 'Histogram':
         check.Save()
         check.Title()
@@ -98,6 +100,8 @@ def DictCheck(initial_dict):
         check.SimExist('label')
 
         check.Bins()
+
+        initial_dict.setdefault('total_lines', sum(sub_dict['cycles'] for sub_dict in initial_dict['sim']))
     elif initial_dict['init'] == 'Visualize':
         pass
     else:
@@ -119,7 +123,6 @@ def _defaults(initial_dict):
     initial_dict.setdefault('InputData', False)
     if initial_dict['init'] == 'Histogram' or 'Variable':
         # data folder to save data files in; uses a timestamp for a label
-        print("hi!!!!!!!!!!!!")
         if not initial_dict['InputData']:
             initial_dict.setdefault('data_folder',
                 "Data/{}".format(
@@ -133,7 +136,6 @@ def _defaults(initial_dict):
         initial_dict.setdefault('Animate', False)
         initial_dict.setdefault('FPS', 20)
         initial_dict.setdefault('PlotSave', "temp.pdf")
-
     if initial_dict['init'] == 'Variable':
         initial_dict.setdefault('ylabel', 'Regret')
         initial_dict.setdefault('xlabel', ' ')
@@ -306,14 +308,4 @@ class _check:
                     self.initial_dict['Var']['samples'])
             except KeyError:
                 pass
-
-        # calculate the total number of operations that the Variable class is
-        # going to run through
-        t_ops = 0
-        for sub_dict in self.initial_dict['sim']:
-            t_ops += len(self.initial_dict['arg_list'])
-        for sub_dict in self.initial_dict['sim']:
-            sub_dict['total_ops'] = t_ops
-        self.initial_dict['op_n'] = 0
-
         return None
