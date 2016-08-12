@@ -1,8 +1,12 @@
 from banditvis.manager import run
 import time
 
+# This is an example run file
+# it calls the banditvis "run" method
+
 if __name__ == "__main__":
     start_time = time.clock()
+
 
     run()
 

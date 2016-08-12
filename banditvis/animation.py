@@ -22,7 +22,7 @@ def HistAnimation(core_dict):
     """
 
     # defaults
-    mpl_defaults.ani()
+    fig, ax = mpl_defaults.ani()
 
     plt.rcParams['figure.titlesize'] = 14
     plt.rcParams['font.size'] = 12
@@ -31,8 +31,6 @@ def HistAnimation(core_dict):
     # plot variables
     cmap1 = plt.cm.get_cmap('BuGn')
     cmap2 = plt.cm.get_cmap('Blues')
-    fig = plt.figure(figsize=(14,9), facecolor='white')
-    ax = fig.add_subplot(1,1,1)
     bins = np.linspace(0,core_dict['bins'][0],100)
 
     # formatting
@@ -98,7 +96,7 @@ def ConfAnimation(core_dict):
     """
 
     # defaults
-    mpl_defaults.ani()
+    fig, ax = mpl_defaults.ani()
 
     # map the core_dict to actual objects
     ReMapSim(core_dict['sim'][0])
@@ -119,14 +117,6 @@ def ConfAnimation(core_dict):
     # initialize the bandit
     for i in range(arms):
         sim.bandit.pullArm(i)
-
-    fig = plt.figure(figsize=(14,9), facecolor='white')
-    ax = fig.add_subplot(1,1,1)
-
-    # formatting
-    ax.spines['right'].set_color('none')
-    ax.spines['top'].set_color('none')
-    ax.spines['left'].set_color('none')
 
     # the animation update function
     def _update(num, confidence):

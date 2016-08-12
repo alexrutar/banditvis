@@ -40,7 +40,6 @@ def VarPlot(core_dict):
 
     TODO:
     * add proper label support from user input
-    * move VarData out of this location
     """
 
     # defaults
@@ -71,7 +70,6 @@ def VarPlot(core_dict):
     _safe_plot_save(core_dict['PlotSave'])
 
     return None
-
 
 
 def HistPlot(core_dict):

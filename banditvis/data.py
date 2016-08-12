@@ -4,6 +4,7 @@ import numpy as np
 from .simulation import ReMapSim
 from pprint import pprint
 import time
+import multiprocessing as mp
 
 def _fix_vars(obj, variable):
     """
@@ -39,7 +40,7 @@ def HistData(core_dict):
     """
     os.mkdir(core_dict['data_folder'])
 
-    for i, sub_dict in enumerate(core_dict['sim']):
+    def make(i, sub_dict):
         file_name = "{}/data{}.txt".format(core_dict['data_folder'], i)
         temp_dict = copy.deepcopy(sub_dict)
         ReMapSim(temp_dict)
@@ -49,8 +50,11 @@ def HistData(core_dict):
             temp_dict['horizon'],
             temp_dict['cycles'],
             file_name)
+        return None
 
-    return None
+    proc_list = [mp.Process(target=make, args=(i, sub_dict)) for i, sub_dict in enumerate(core_dict['sim'])]
+
+    return proc_list
 
 
 def VarData(core_dict):
@@ -71,9 +75,9 @@ def VarData(core_dict):
         * the bandit algorithm is run using the replaced string
     """
     os.mkdir(core_dict['data_folder'])
-    iter_list = core_dict['arg_list']
 
-    for i, sub_dict in enumerate(core_dict['sim']):
+    def make(i, sub_dict):
+        iter_list = core_dict['arg_list']
         for num in iter_list:  # now num is the variable
             core_dict['op_n'] += 1
             temp_dict = _fix_vars(sub_dict, num)
@@ -89,4 +93,6 @@ def VarData(core_dict):
                 temp_dict['cycles'],
                 file_name)
 
-    return None
+    proc_list = [mp.Process(target=make, args=(i, sub_dict)) for i, sub_dict in enumerate(core_dict['sim'])]
+
+    return proc_list

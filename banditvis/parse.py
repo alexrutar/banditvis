@@ -98,7 +98,7 @@ def DictCheck(initial_dict):
         check.SimExist('label')
 
         check.Bins()
-    elif initial_dict['init'] == 'Visual':
+    elif initial_dict['init'] == 'Visualize':
         pass
     else:
         sys.exit(bcolors.FAIL
@@ -111,12 +111,15 @@ def _defaults(initial_dict):
     """
     Builds some default values in the initial_dict.
 
-    This is going ot be fixed soon...
+    This is going ot be fixed soon...perhaps incorporated into the _check
+    class as an argument to its methods (a default='something' keyword
+    argument)
     """
+    initial_dict.setdefault('Multiprocess', 1)
     initial_dict.setdefault('InputData', False)
-    if (initial_dict['init'] == 'Histogram'
-        or initial_dict['init'] == 'Variable'):
+    if initial_dict['init'] == 'Histogram' or 'Variable':
         # data folder to save data files in; uses a timestamp for a label
+        print("hi!!!!!!!!!!!!")
         if not initial_dict['InputData']:
             initial_dict.setdefault('data_folder',
                 "Data/{}".format(
@@ -130,9 +133,11 @@ def _defaults(initial_dict):
         initial_dict.setdefault('Animate', False)
         initial_dict.setdefault('FPS', 20)
         initial_dict.setdefault('PlotSave', "temp.pdf")
+
     if initial_dict['init'] == 'Variable':
         initial_dict.setdefault('ylabel', 'Regret')
         initial_dict.setdefault('xlabel', ' ')
+
     for sub_dict in initial_dict['sim']:
         if initial_dict['init'] == 'Visualize':
             initial_dict.setdefault('FPS', 20)
@@ -143,6 +148,7 @@ def _defaults(initial_dict):
         if not initial_dict['InputData']:
             if sub_dict['Bandit']['ArmList'][0][0] == 'Linear':
                 sub_dict.setdefault('Normalized', False)
+
     return None
 
 
@@ -203,6 +209,10 @@ class _check:
                 del self.initial_dict['{}'.format(name)]
         return None
 
+    # def Exist(self):
+    #     """
+    #     Checks if 'name' exists in the core_dict
+    #     """
 
     def SimExist(self, name):
         """
