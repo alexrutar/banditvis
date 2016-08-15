@@ -48,7 +48,7 @@ def VarPlot(core_dict):
     # add plots
     for i, sub_dict in enumerate(core_dict['sim']):
         y_list = np.loadtxt(
-            "{}/data{}.txt".format(core_dict['data_folder'], i),
+            "{}/data{}.txt".format(core_dict['DataFolder'], i),
             float)
         x_list = core_dict['arg_list']
 
@@ -96,7 +96,7 @@ def HistPlot(core_dict):
     # add plots
     for i, sub_dict in enumerate(core_dict['sim']):
         data = np.loadtxt(
-            "{}/data{}.txt".format(core_dict['data_folder'], i),
+            "{}/data{}.txt".format(core_dict['DataFolder'], i),
             float)
 
         cmap = cmap_colors.sequential1[i]

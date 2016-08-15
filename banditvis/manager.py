@@ -28,6 +28,11 @@ def _getInput():
     return core_dict
 
 
+class _managerThread(th.Thread):
+    def __init__(self, proc_list, n_processes):
+        super(_statusThread, self).__init__()
+
+
 def _run(proc_list, n_processes):
     def _chunks(l, n):
         """Yield successive n-sized chunks from l."""
@@ -53,20 +58,26 @@ class _statusThread(th.Thread):
             current = 0
             try:
                 for i in range(self.n_files):
-                    with open("{}/data{}.txt".format(self.core_dict['data_folder'], i), 'r') as file:
+                    with open("{}/data{}.txt".format(self.core_dict['DataFolder'],i), 'r') as file:
                         current += sum(1 for line in file) - 1
             except FileNotFoundError:
                 pass
             sys.stdout.write("\r--  {} % complete --".format(int(current*100/self.total)))
             sys.stdout.flush()
+
+
+
 def run():
     core_dict = _getInput()
     n_processes = core_dict['Multiprocess']
-    # -------------------------------------------------------------------------
-    print("\n\nCompleted core_dict\n\n")
+    # ----------------------------------------------------------------------------------------------
+    print("\n\nCompleted core_dict\n")
     pprint(core_dict)
     print("--\n\n")
-    # -------------------------------------------------------------------------
+    print("Default Dict\n")
+    pprint(core_dict.default)
+    print("--\n\n")
+    # ----------------------------------------------------------------------------------------------
 
     if core_dict['init'] == 'Histogram':
         status = _statusThread(core_dict)
@@ -74,12 +85,13 @@ def run():
         if not core_dict['InputData']:
             proc_list = HistData(core_dict)
         if core_dict['Animate']:  # TODO in general fix this thing
-            time.sleep(1)  # TODO fix so that it doesn't try to access an
-            # empty
-            HistAnimation(core_dict)
-
-        # hacky pool-like behaviour; I'm not the biggest fan but it works,
-        # unlike multiprocessing.pool!
+            while True:
+                try:
+                    HistAnimation(core_dict)
+                    break
+                except FileNotFoundError:
+                    time.sleep(0.3)
+        # hacky pool-like behaviour; I'm not the biggest fan but it works, unlike mp.pool!
         _run(proc_list, n_processes)
 
         HistPlot(core_dict)

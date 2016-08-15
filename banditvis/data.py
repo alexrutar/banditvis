@@ -38,10 +38,10 @@ def HistData(core_dict):
         * runs that Simulation object using runHist
         * saves that data in the specified folder
     """
-    os.mkdir(core_dict['data_folder'])
+    os.mkdir(core_dict['DataFolder'])
 
     def make(i, sub_dict):
-        file_name = "{}/data{}.txt".format(core_dict['data_folder'], i)
+        file_name = "{}/data{}.txt".format(core_dict['DataFolder'], i)
         temp_dict = copy.deepcopy(sub_dict)
         ReMapSim(temp_dict)
         sim = temp_dict['Simulation']
@@ -52,7 +52,8 @@ def HistData(core_dict):
             file_name)
         return None
 
-    proc_list = [mp.Process(target=make, args=(i, sub_dict)) for i, sub_dict in enumerate(core_dict['sim'])]
+    proc_list = [mp.Process(target=make, args=(i, sub_dict))
+        for i, sub_dict in enumerate(core_dict['sim'])]
 
     return proc_list
 
@@ -74,7 +75,7 @@ def VarData(core_dict):
         * every instance of '#' is replaced with num
         * the bandit algorithm is run using the replaced string
     """
-    os.mkdir(core_dict['data_folder'])
+    os.mkdir(core_dict['DataFolder'])
 
     def make(i, sub_dict):
         iter_list = core_dict['arg_list']
@@ -84,12 +85,14 @@ def VarData(core_dict):
             ReMapSim(temp_dict)
             sim = temp_dict['Simulation']
 
-            file_name = "{}/data{}.txt".format(core_dict['data_folder'], i)
+            file_name = "{}/data{}.txt".format(core_dict['DataFolder'], i)
             sim.runVar(
                 temp_dict['horizon'],
                 temp_dict['cycles'],
-                file_name)
+                file_name
+            )
 
-    proc_list = [mp.Process(target=make, args=(i, sub_dict)) for i, sub_dict in enumerate(core_dict['sim'])]
+    proc_list = [mp.Process(target=make, args=(i, sub_dict))
+        for i, sub_dict in enumerate(core_dict['sim'])]
 
     return proc_list

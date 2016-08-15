@@ -1,4 +1,4 @@
-from banditvis.manager import run
+from banditvis import run
 import time
 
 # This is an example run file

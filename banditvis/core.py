@@ -76,8 +76,7 @@ class Bandit:
     def giveRegret(self):
         self.regret = 0
         for arm in range(self.n_arms):
-            self.regret += \
-                self.T[arm] * (np.amax(self.mean_list) - self.arms[arm].mean)
+            self.regret += self.T[arm] * (np.amax(self.mean_list) - self.arms[arm].mean)
 
         return(self.regret)
 
@@ -194,8 +193,10 @@ class LinBandit:
         return None
 
     def giveRegret(self):
-        return (np.amax(np.dot(self.arm_vecs, self.mean)) * self.timestep[0]
-            - np.dot(self.T, np.dot(self.arm_vecs, self.mean)))
+        return (np.amax(np.dot(self.arm_vecs, self.mean)) * self.timestep[0] - np.dot(
+            self.T,
+            np.dot(self.arm_vecs, self.mean))
+        )
 
     def reset(self):
         self.T = np.zeros(self.n_arms)
@@ -204,26 +205,27 @@ class LinBandit:
         self.A = np.zeros(self.dim)  # vectors of actions taken so far weighted by the reward
         self.U_conf = np.zeros(self.n_arms)
         self.timestep = np.zeros(self.n_arms, dtype=np.int)
+        return None
 
     def fullInfo(self):
         print("\n" + "+" + "-"*105 + "+")
         print("| Mean Vector: {}\n|".format(self.mean))
         print("| Gram Matrix: \n{}\n| ".format(self.G))
         for arm in range(self.n_arms):
-            print("| Arm {0}: {1}, confidence ({2:f}), called ({3}) times\n| "
-                .format(
-                    arm,
-                    self.arms[arm].arm_vec,
-                    self.U_conf[arm],
-                    self.T[arm]))
+            print("| Arm {0}: {1}, confidence ({2:f}), called ({3}) times\n| ".format(
+                arm,
+                self.arms[arm].arm_vec,
+                self.U_conf[arm],
+                self.T[arm])
+            )
         print("Mean Reward Vector: {}".format(self.U))
-        print("|\n| {0} arms,  timestep ({1} / {2})".
-            format(
-                self.n_arms,
-                self.timestep[0],
-                self.horizon[0]))
+        print("|\n| {0} arms,  timestep ({1} / {2})".format(
+            self.n_arms,
+            self.timestep[0],
+            self.horizon[0])
+        )
         print("+" + "-"*105 + "+" + "\n")
-        return 0
+        return None
 
 class Algorithm:
     """

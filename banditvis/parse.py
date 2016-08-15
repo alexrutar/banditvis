@@ -3,6 +3,7 @@ import sys
 import numpy as np
 import yaml
 from datetime import datetime
+from pprint import pprint
 
 from .formatting import bcolors
 
@@ -16,39 +17,31 @@ def Parse(user_file):
 
     # Try to load the file and catch YAML syntax errors for nicer formatting
     try:
-        initial_dict = yaml.load(open(user_file, 'r'))
+        core_dict = CoreDict(yaml.load(open(user_file, 'r')))
     except yaml.parser.ParserError as e:
-        location = (str(e).split("\n")[1].split(",")[1]
-            + str(e).split("\n")[1].split(",")[2]
-            )[1:]
+        location = (str(e).split("\n")[1].split(",")[1] + str(e).split("\n")[1].split(",")[2])[1:]
         e_msg = str(e).split("\n")[2]
-        sys.exit(
-            bcolors.FAIL
-            + "\nYAML Syntax Error "
-            + bcolors.ENDC
+        sys.exit(bcolors.FAIL + "\nYAML Syntax Error " + bcolors.ENDC
             + "in {}:\n  > {}\n".format(location, e_msg)
-            )
+        )
     except yaml.scanner.ScannerError as e:
         location = (str(e).split("\n")[1].split(",")[1]
             + str(e).split("\n")[1].split(",")[2]
             )[1:]
         e_msg = str(e).split("\n")[0]
-        sys.exit(
-            bcolors.FAIL
-            + "\nYAML Syntax Error "
-            + bcolors.ENDC
+        sys.exit(bcolors.FAIL + "\nYAML Syntax Error " + bcolors.ENDC
             + "in {}:\n  > {}\n".format(location, e_msg)
             )
 
     # creates a simulation dictionary list for easier access
-    initial_dict['sim'] = []
-    for sim_key in list(initial_dict.keys()):
+    core_dict['sim'] = []
+    for sim_key in list(core_dict.keys()):
         if sim_key[:10] == 'Simulation':
-            initial_dict['sim'].append(initial_dict[sim_key])
-            del(initial_dict[sim_key])
+            core_dict['sim'].append(CoreDict(core_dict[sim_key]))
+            del(core_dict[sim_key])
 
     # perform the dictionary check, and get the errors
-    core_dict, errors = DictCheck(initial_dict)
+    core_dict, errors, warnings = DictCheck(core_dict)
 
     # if there are errors, print them
     if errors:
@@ -56,16 +49,15 @@ def Parse(user_file):
             + "\n+" + "ERROR LIST".center(100, "-") + "+\n" + bcolors.ENDC
             + self.errors + "\n\n")
     else:
-        print(bcolors.OKGREEN
-            + "\n" + "".center(100, "=")
-            + "\n" + "".center(100, "=")
-            + "\n" + bcolors.ENDC)
+        print(bcolors.OKGREEN + "\n" + "".center(100, "=") + "\n" + "".center(100, "=") + "\n"
+            + bcolors.ENDC
+        )
 
     # done!
     return core_dict
 
 
-def DictCheck(initial_dict):
+def DictCheck(core_dict):
     """
     The checking function, uses _check class to perform these checks nicely.
 
@@ -73,14 +65,13 @@ def DictCheck(initial_dict):
     other specifics. The full list of checking functions with explanations
     can be found in the _check class.
     """
-    _defaults(initial_dict)
-
-    check = _check(initial_dict)
-    if initial_dict['InputData']:
+    check = _check(core_dict)
+    if core_dict['InputData']:
         check.SimExist('label')
         check.Save()
         check.Title()
-    elif initial_dict['init'] == 'Variable':
+
+    elif core_dict['init'] == 'Variable':
         check.Save()
         check.Title()
 
@@ -89,9 +80,11 @@ def DictCheck(initial_dict):
         check.SimExist('label')
 
         check.Args()
-        initial_dict.setdefault('total_lines', len(initial_dict['sim']) * len(initial_dict['arg_list']))
+        core_dict.setdefault('total_lines',
+            len(core_dict['sim']) * len(core_dict['arg_list'])
+        )
 
-    elif initial_dict['init'] == 'Histogram':
+    elif core_dict['init'] == 'Histogram':
         check.Save()
         check.Title()
 
@@ -101,58 +94,51 @@ def DictCheck(initial_dict):
 
         check.Bins()
 
-        initial_dict.setdefault('total_lines', sum(sub_dict['cycles'] for sub_dict in initial_dict['sim']))
-    elif initial_dict['init'] == 'Visualize':
+        core_dict.setdefault('total_lines',
+            sum(sub_dict['cycles'] for sub_dict in core_dict['sim'])
+        )
+    elif core_dict['init'] == 'Visualize':
         pass
+
     else:
         sys.exit(bcolors.FAIL
             + '\n\nIf you get this message, something wend badly wrong...\n'
-            + bcolors.ENDC)
+            + bcolors.ENDC
+        )
     return check.give()
 
 
-def _defaults(initial_dict):
+
+class CoreDict(dict):
     """
-    Builds some default values in the initial_dict.
+    Subclasses dict to change behaviour with missing key (allows setting of deafults easily) and
+    some other custom methods.
 
-    This is going ot be fixed soon...perhaps incorporated into the _check
-    class as an argument to its methods (a default='something' keyword
-    argument)
+    TODO: read defaults from some external file, maybe with type-specific defaults
     """
-    initial_dict.setdefault('Multiprocess', 1)
-    initial_dict.setdefault('InputData', False)
-    if initial_dict['init'] == 'Histogram' or 'Variable':
-        # data folder to save data files in; uses a timestamp for a label
-        if not initial_dict['InputData']:
-            initial_dict.setdefault('data_folder',
-                "Data/{}".format(
-                    initial_dict['init'][:4]
-                    + " "
-                    + datetime.strftime(
-                        datetime.now(), '%Y-%m-%d %H_%M_%S')))
-        else:
-            initial_dict.setdefault('data_folder',
-                "Data/{}".format(initial_dict['InputData']))
-        initial_dict.setdefault('Animate', False)
-        initial_dict.setdefault('FPS', 20)
-        initial_dict.setdefault('PlotSave', "temp.pdf")
-    if initial_dict['init'] == 'Variable':
-        initial_dict.setdefault('ylabel', 'Regret')
-        initial_dict.setdefault('xlabel', ' ')
-
-    for sub_dict in initial_dict['sim']:
-        if initial_dict['init'] == 'Visualize':
-            initial_dict.setdefault('FPS', 20)
-            sub_dict.setdefault('NoAxesTick', False)
-            sub_dict.setdefault('HelpLines', True)
-            sub_dict.setdefault('FPS', 20)
-            sub_dict.setdefault('LevelCurves', True)
-        if not initial_dict['InputData']:
-            if sub_dict['Bandit']['ArmList'][0][0] == 'Linear':
-                sub_dict.setdefault('Normalized', False)
-
-    return None
-
+    def __init__(self, in_dict):
+        dict.__init__(self, in_dict)
+        pprint(in_dict)
+        self.default = {
+            'Animate': False,
+            'DataFolder': "Data/{} ".format(datetime.strftime(datetime.now(), '%Y-%m-%d %H_%M_%S')),
+            'FPS': 20,
+            'HelpLines': True,
+            'InputData': False,
+            'LevelCurves': True,
+            'Multiprocess': 1,
+            'NoAxesTick': False,
+            'Normalized': False,
+            'PlotSave': "temp.pdf"
+        }
+        self.warnings = ''
+    def __missing__(self, key):
+        try:
+            self.warnings += '{} missing, defaulting to {}\n'.format(key, self.default[key])
+            return self.default[key]
+        except KeyError:
+            raise KeyError("CoreDict: '{}' key missing in both the dict and the default dict."
+                .format(key))
 
 class _check:
     """
@@ -161,12 +147,24 @@ class _check:
 
     """
 
-    def __init__(self, initial_dict):
-        self.initial_dict = initial_dict
+    def __init__(self, core_dict):
+        self.core_dict = core_dict
         self.errors = ""
+        self.warnings = ""  # TODO work on this
 
     def give(self):
-        return (self.initial_dict, self.errors)
+        return (self.core_dict, self.errors, self.warnings)
+
+    def Visual(self, name):
+        if core_dict['visual'] == 'confidence':
+            pass
+
+        elif core_dict['visual'] == 'ellipse':
+            pass
+        elif core_dict['visual'] == 'distribution':
+            pass
+        else:
+            pass
 
     def Conflict(self, name):
         """
@@ -176,13 +174,13 @@ class _check:
         the simulation subdictionaries for easier access later.
         """
         checklist = \
-            {'low_{}'.format(name) : [False] * len(self.initial_dict['sim']),
+            {'low_{}'.format(name) : [False] * len(self.core_dict['sim']),
             'top_{}'.format(name) : [False]}
 
-        if name in self.initial_dict.keys():
+        if name in self.core_dict.keys():
             checklist['top_{}'.format(name)] = True
 
-        for i, sub_dict in enumerate(self.initial_dict['sim']):
+        for i, sub_dict in enumerate(self.core_dict['sim']):
             if name in sub_dict.keys():
                 checklist['low_{}'.format(name)][i] = True
 
@@ -192,9 +190,8 @@ class _check:
                 if not item:
                     cntr += 1
             if cntr != 0:
-                self.errors += ("\n- ({0}) was not declared at the top level, "
-                    "and you are missing a ({0}) declaration in ({1}) "
-                    "simulation(s)".format(name, cntr))
+                self.errors += ("\n- ({0}) was not declared at the top level, and you are missing a"
+                    " ({0}) declaration in ({1}) simulation(s)".format(name, cntr))
         else:
             cntr = 0
             for item in checklist['low_{}'.format(name)]:
@@ -205,31 +202,37 @@ class _check:
                 "you have ({0}) declarations in ({1}) simulation(s).".format(
                     name, cntr))
             else:
-                for sub_dict in self.initial_dict['sim']:
+                for sub_dict in self.core_dict['sim']:
                     sub_dict['{}'.format(name)] = \
-                        self.initial_dict['{}'.format(name)]
-                del self.initial_dict['{}'.format(name)]
+                        self.core_dict['{}'.format(name)]
+                del self.core_dict['{}'.format(name)]
         return None
 
-    # def Exist(self):
-    #     """
-    #     Checks if 'name' exists in the core_dict
-    #     """
+    def Exist(self, name):
+        """
+        Checks if 'name' exists in the core_dict
+        """
+        if name not in self.core_dict.keys():
+            self.errors += "\n- You are missing a top-level ({}) declaration.".format(
+                name)
+        else:
+            pass
+        return None
+
 
     def SimExist(self, name):
         """
         Checks if 'name' exists in every single simulation sub_dictionary, and
         adds an error if it doesn't
         """
-        checklist = \
-            {'low_{}'.format(name) : [False] * len(self.initial_dict['sim'])}
-        for i, sub_dict in enumerate(self.initial_dict['sim']):
+        checklist = {'low_{}'.format(name) : [False] * len(self.core_dict['sim'])}
+        for i, sub_dict in enumerate(self.core_dict['sim']):
             if name in sub_dict.keys():
                 checklist['low_{}'.format(name)][i] = True
         if (checklist['low_{}'.format(name)]
-            != [True] * len(self.initial_dict['sim'])):
-            self.errors += ("\n- You are missing at least one simulation ({}) "
-                "declaration.".format(name))
+            != [True] * len(self.core_dict['sim'])):
+            self.errors += "\n- You are missing at least one simulation ({}) declaration.".format(
+                name)
         return None
 
 
@@ -237,14 +240,12 @@ class _check:
         """
         Checks the save format for .pdf or .png. It returns an error otherwise.
         """
-        self.initial_dict.setdefault('PlotSave', 'temp.pdf')
-        if ('.pdf' not in self.initial_dict['PlotSave'][-4:]
-            and '.png' not in self.initial_dict['PlotSave'][-4:]):
-            self.errors += ("\n- PlotSave: You can only save a plot as a "
-                "'.pdf' or '.png'. PDF is the recommended file type for image "
-                "quality reasons.")
-        self.initial_dict['PlotSave'] = \
-            'Output/' + self.initial_dict['PlotSave']
+        self.core_dict.setdefault('PlotSave', 'temp.pdf')
+        if ('.pdf' not in self.core_dict['PlotSave'][-4:]
+            and '.png' not in self.core_dict['PlotSave'][-4:]):
+            self.errors += ("\n- PlotSave: You can only save a plot as a '.pdf' or '.png'. PDF is "
+                "the recommended file type for image quality reasons.")
+        self.core_dict['PlotSave'] = 'Output/' + self.core_dict['PlotSave']
         return None
 
 
@@ -253,13 +254,12 @@ class _check:
         Checks if a title exists; if one desn't it generates one from the file
         name, and if one does it adds a newline below for formatting.
         """
-        self.initial_dict.setdefault('PlotTitle', False)
-        if not self.initial_dict['PlotTitle']:
-            self.initial_dict['PlotTitle'] = \
-                self.initial_dict['PlotSave'].split("/")[-1].split(".")[0] \
-                + "\n"
+        self.core_dict.setdefault('PlotTitle', False)
+        if not self.core_dict['PlotTitle']:
+            self.core_dict['PlotTitle'] = \
+                self.core_dict['PlotSave'].split("/")[-1].split(".")[0] + "\n"
         else:
-            self.initial_dict['PlotTitle'] += "\n"
+            self.core_dict['PlotTitle'] += "\n"
         return None
 
 
@@ -268,14 +268,14 @@ class _check:
         Determines how many bins the histogram should have based on the proper-
         ties of the bandit.
         """
-        self.initial_dict['bins'] = []
-        for sub_dict in self.initial_dict['sim']:
+        self.core_dict['bins'] = []
+        for sub_dict in self.core_dict['sim']:
             if sub_dict['Bandit']['ArmList'][0][0] == 'Linear':
                 mean_list = [np.inner(arm[1], sub_dict['Bandit']['MeanVector'])
                     for arm in sub_dict['Bandit']['ArmList']]
             else:
                 mean_list = [arm[1] for arm in sub_dict['Bandit']['ArmList']]
-            self.initial_dict['bins'].append(np.amax(
+            self.core_dict['bins'].append(np.amax(
                 mean_list - np.amin(mean_list)) * sub_dict['horizon'])
         return None
 
@@ -286,26 +286,24 @@ class _check:
         This builds a single list of args out of the inputs to be used later.
         """
         checklist = {'linspace': False, 'args': False}
-        if ('domain' in self.initial_dict['Var'].keys()
-            and 'samples' in self.initial_dict['Var'].keys()):
+        if ('domain' in self.core_dict['Var'].keys()
+            and 'samples' in self.core_dict['Var'].keys()):
             checklist['linspace'] = True
 
-        if 'arg_list' in self.initial_dict['Var'].keys():
+        if 'arg_list' in self.core_dict['Var'].keys():
             checklist['args'] = True
 
         if checklist['linspace'] and checklist['args']:
-            self.errors += ("\n- Declare either (domain and samples) or (args)"
-                ", not both.")
+            self.errors += ("\n- Declare either (domain and samples) or (args), not both.")
 
         elif not checklist['linspace'] and not checklist['args']:
-            self.errors += ("\n- You must declare either (domain and samples) "
-                "or (args).")
+            self.errors += ("\n- You must declare either (domain and samples) or (args).")
         else:
             try:
-                self.initial_dict['arg_list'] = np.linspace(
-                    self.initial_dict['Var']['domain'][0],
-                    self.initial_dict['Var']['domain'][1],
-                    self.initial_dict['Var']['samples'])
+                self.core_dict['arg_list'] = np.linspace(
+                    self.core_dict['Var']['domain'][0],
+                    self.core_dict['Var']['domain'][1],
+                    self.core_dict['Var']['samples'])
             except KeyError:
                 pass
         return None

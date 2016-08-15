@@ -48,7 +48,7 @@ def HistAnimation(core_dict):
     ax.spines['left'].set_color('none')
 
     # load data
-    data = np.loadtxt(core_dict['data_folder'] + "/data0.txt", float)
+    data = np.loadtxt(core_dict['DataFolder'] + "/data0.txt", float)
 
     # update function used by the animation
     def _update(num, data):
@@ -56,7 +56,7 @@ def HistAnimation(core_dict):
 
         # clear axes, load data to refresh
         plt.cla()
-        data = np.loadtxt(core_dict['data_folder'] + "/data0.txt", float)
+        data = np.loadtxt(core_dict['DataFolder'] + "/data0.txt", float)
 
         # plots
         plt.axvline(x = np.average(data),
@@ -504,9 +504,20 @@ def DistAnimation(core_dict):
         for i in range(n_arms):
             cmap = cmap_colors.sequential1[i]
             plt.plot(xdata[i], ydata[i], "-", color=cmap(0.5))
-            ax.fill_between(xdata[i], 0, ydata[i], color=cmap(0.5), alpha=0.2, linewidth=0.5, label="Arm {}: Pulls: {}".format(i+1, sim.bandit.T[i]))
-            plt.axvline(sim.bandit.U[i], ymax=v_line_max[i], ls='dashed', color=cmap(0.8))
-            plt.axvline(sim.bandit.mean_list[i], ymax=1, ls='dashdot', alpha=0.6, color=cmap(0.8))
+            ax.fill_between(xdata[i], 0, ydata[i],
+                color=cmap(0.5),
+                alpha=0.2,
+                linewidth=0.5,
+                label="Arm {}: Pulls: {}".format(i+1, sim.bandit.T[i]))
+            plt.axvline(sim.bandit.U[i],
+                ymax=v_line_max[i],
+                ls='dashed',
+                color=cmap(0.8))
+            plt.axvline(sim.bandit.mean_list[i],
+                ymax=1,
+                ls='dashdot',
+                alpha=0.6,
+                color=cmap(0.8))
 
         ylims = [0, ymax]
         # general formatting
