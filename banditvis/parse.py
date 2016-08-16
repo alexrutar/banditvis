@@ -1,4 +1,5 @@
 import sys
+import multiprocessing as mp
 
 import numpy as np
 import yaml
@@ -17,6 +18,7 @@ def Parse(user_file):
 
     # Try to load the file and catch YAML syntax errors for nicer formatting
     try:
+        print("hi")
         core_dict = CoreDict(yaml.load(open(user_file, 'r')))
     except yaml.parser.ParserError as e:
         location = (str(e).split("\n")[1].split(",")[1] + str(e).split("\n")[1].split(",")[2])[1:]
@@ -41,17 +43,18 @@ def Parse(user_file):
             del(core_dict[sim_key])
 
     # perform the dictionary check, and get the errors
-    core_dict, errors, warnings = DictCheck(core_dict)
+    core_dict, errors = DictCheck(core_dict)
 
     # if there are errors, print them
     if errors:
         sys.exit(bcolors.FAIL
-            + "\n+" + "ERROR LIST".center(100, "-") + "+\n" + bcolors.ENDC
+            + "\n+" + " ERROR LIST ".center(100, "-") + "+\n" + bcolors.ENDC
             + self.errors + "\n\n")
     else:
-        print(bcolors.OKGREEN + "\n" + "".center(100, "=") + "\n" + "".center(100, "=") + "\n"
-            + bcolors.ENDC
-        )
+        print(bcolors.OKGREEN + "\n" + "No Errors!".center(100, "-") + "\n" + bcolors.ENDC)
+
+    # post processing
+    core_dict.post()
 
     # done!
     return core_dict
@@ -80,9 +83,6 @@ def DictCheck(core_dict):
         check.SimExist('label')
 
         check.Args()
-        core_dict.setdefault('total_lines',
-            len(core_dict['sim']) * len(core_dict['arg_list'])
-        )
 
     elif core_dict['init'] == 'Histogram':
         check.Save()
@@ -93,10 +93,6 @@ def DictCheck(core_dict):
         check.SimExist('label')
 
         check.Bins()
-
-        core_dict.setdefault('total_lines',
-            sum(sub_dict['cycles'] for sub_dict in core_dict['sim'])
-        )
     elif core_dict['init'] == 'Visualize':
         pass
 
@@ -108,7 +104,6 @@ def DictCheck(core_dict):
     return check.give()
 
 
-
 class CoreDict(dict):
     """
     Subclasses dict to change behaviour with missing key (allows setting of deafults easily) and
@@ -118,27 +113,47 @@ class CoreDict(dict):
     """
     def __init__(self, in_dict):
         dict.__init__(self, in_dict)
-        pprint(in_dict)
-        self.default = {
-            'Animate': False,
-            'DataFolder': "Data/{} ".format(datetime.strftime(datetime.now(), '%Y-%m-%d %H_%M_%S')),
-            'FPS': 20,
-            'HelpLines': True,
-            'InputData': False,
-            'LevelCurves': True,
-            'Multiprocess': 1,
-            'NoAxesTick': False,
-            'Normalized': False,
-            'PlotSave': "temp.pdf"
-        }
-        self.warnings = ''
+        # fix this thing somehow
+        self.default = yaml.load(open('/Users/alexrutar/Documents/Projects/banditvis/banditvis/defaults.txt', 'r'))
+        self.ignore = {'InputData', 'DataFolder', 'Animate'}
+        self.warning_list = []
+    def post(self):
+        """
+        Additional changes to be done after checking
+        """
+        self.default['DataFolder'] = "Data/{}".format(
+            datetime.strftime(datetime.now(), '%Y-%m-%d %H_%M_%S'))
+        if self['init'] == 'Histogram':
+            self['total_lines'] = sum(sub_dict['cycles'] for sub_dict in self['sim'])
+        elif self['init'] == 'Variable':
+            self['total_lines'] = len(self['arg_list']) * len(core_dict['sim'])
+
     def __missing__(self, key):
         try:
-            self.warnings += '{} missing, defaulting to {}\n'.format(key, self.default[key])
+            if key not in self.ignore:
+                self.warning_list += ["'{} missing, defaulting to '{}'".format(
+                    key,
+                    self.default[key])]
             return self.default[key]
         except KeyError:
             raise KeyError("CoreDict: '{}' key missing in both the dict and the default dict."
                 .format(key))
+    def warnings(self):
+        if not self.warning_list:
+            return (bcolors.OKGREEN + "\n" + " No Warnings! ".center(100, "-") + "\n" + bcolors.ENDC)
+        else:
+            # removes repeats from the warning list
+            return (bcolors.WARN
+                + "\n+" + " WARNING LIST ".center(100, "-") + "+\n" + bcolors.ENDC
+                + "".join(["- {}\n".format(item) for item in list(set(self.warning_list))]))
+    def state(self):
+        print(bcolors.OKBLUE + "\n" + " Completed Core Dict ".center(100, "-") + "\n" + bcolors.ENDC)
+        pprint(self)
+        print(bcolors.OKBLUE + "\n" + " Default Dict ".center(100, "-") + "\n" + bcolors.ENDC)
+        pprint(self.default)
+        print(bcolors.OKBLUE + "\n" + " End State ".center(100, "-") + "\n" + bcolors.ENDC)
+
+        return None
 
 class _check:
     """
@@ -150,10 +165,9 @@ class _check:
     def __init__(self, core_dict):
         self.core_dict = core_dict
         self.errors = ""
-        self.warnings = ""  # TODO work on this
 
     def give(self):
-        return (self.core_dict, self.errors, self.warnings)
+        return (self.core_dict, self.errors)
 
     def Visual(self, name):
         if core_dict['visual'] == 'confidence':

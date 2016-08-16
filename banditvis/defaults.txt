@@ -1,0 +1,12 @@
+
+
+
+Animate: False
+FPS: 20
+HelpLines: True
+InputData: False
+LevelCurves: True
+Multiprocess: 1
+NoAxesTick: False
+Normalized: False
+PlotSave: "Output/temp.pdf"
