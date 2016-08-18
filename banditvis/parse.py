@@ -1,5 +1,6 @@
 import sys
 import multiprocessing as mp
+import re
 
 import numpy as np
 import yaml
@@ -8,8 +9,16 @@ from pprint import pprint
 
 from .formatting import bcolors
 
+def _msplit(text, *limiters):
+    """
+    splits 'text' at every occurrence of limiter
+    """
+    for limit in limiters:
+        text = text.replace(limit, '$!!7=4+[4}|[2')
+    return text.split('$!!7=4+[4}|[2')
 
-def Parse(user_file):
+
+def Parse(user_file, **arg_dict):
     """
     Loads the user_file using YAML and then checks the dictionary for
     consistency. Once Parse is completed, it either exits with errors or
@@ -18,21 +27,23 @@ def Parse(user_file):
 
     # Try to load the file and catch YAML syntax errors for nicer formatting
     try:
-        print("hi")
-        core_dict = CoreDict(yaml.load(open(user_file, 'r')))
+        # merge the two dicts
+        core_dict = CoreDict(yaml.load(open(user_file, 'r')), **arg_dict)
     except yaml.parser.ParserError as e:
+        # pull some information out of the ParserError
         location = (str(e).split("\n")[1].split(",")[1] + str(e).split("\n")[1].split(",")[2])[1:]
         e_msg = str(e).split("\n")[2]
         sys.exit(bcolors.FAIL + "\nYAML Syntax Error " + bcolors.ENDC
-            + "in {}:\n  > {}\n".format(location, e_msg)
+            + "in {}:\n  - {}\n".format(location, e_msg)
         )
     except yaml.scanner.ScannerError as e:
+        # pull some information out of the ScannerError
         location = (str(e).split("\n")[1].split(",")[1]
             + str(e).split("\n")[1].split(",")[2]
             )[1:]
         e_msg = str(e).split("\n")[0]
         sys.exit(bcolors.FAIL + "\nYAML Syntax Error " + bcolors.ENDC
-            + "in {}:\n  > {}\n".format(location, e_msg)
+            + "in {}:\n  - {}\n".format(location, e_msg)
             )
 
     # creates a simulation dictionary list for easier access
@@ -72,11 +83,9 @@ def DictCheck(core_dict):
     if core_dict['InputData']:
         check.SimExist('label')
         check.Save()
-        check.Title()
 
     elif core_dict['init'] == 'Variable':
         check.Save()
-        check.Title()
 
         check.Conflict('horizon')
         check.Conflict('cycles')
@@ -86,7 +95,6 @@ def DictCheck(core_dict):
 
     elif core_dict['init'] == 'Histogram':
         check.Save()
-        check.Title()
 
         check.Conflict('horizon')
         check.Conflict('cycles')
@@ -111,22 +119,18 @@ class CoreDict(dict):
 
     TODO: read defaults from some external file, maybe with type-specific defaults
     """
-    def __init__(self, in_dict):
+    def __init__(self, in_dict, **arg_dict):
         dict.__init__(self, in_dict)
-        # fix this thing somehow
-        self.default = yaml.load(open('/Users/alexrutar/Documents/Projects/banditvis/banditvis/defaults.txt', 'r'))
+        for k, v in list(arg_dict.items()):  # removes unspecified arguments
+            if v == None:
+                del(arg_dict[k])
+        try:
+            default_txt = yaml.load(open("/".join(__file__.split('/')[:-1]) + "/defaults.txt", 'r'))
+        except FileNotFoundError:
+            sys.exit("oh")
+        self.default = {**default_txt, **arg_dict}  # add the arg_dict arguments to overwrite any defaults
         self.ignore = {'InputData', 'DataFolder', 'Animate'}
         self.warning_list = []
-    def post(self):
-        """
-        Additional changes to be done after checking
-        """
-        self.default['DataFolder'] = "Data/{}".format(
-            datetime.strftime(datetime.now(), '%Y-%m-%d %H_%M_%S'))
-        if self['init'] == 'Histogram':
-            self['total_lines'] = sum(sub_dict['cycles'] for sub_dict in self['sim'])
-        elif self['init'] == 'Variable':
-            self['total_lines'] = len(self['arg_list']) * len(core_dict['sim'])
 
     def __missing__(self, key):
         try:
@@ -138,6 +142,36 @@ class CoreDict(dict):
         except KeyError:
             raise KeyError("CoreDict: '{}' key missing in both the dict and the default dict."
                 .format(key))
+
+    def post(self):
+        """
+        Additional changes to be done after checking
+        """
+        self.default.setdefault('DataFolder', "{}".format(
+            datetime.strftime(datetime.now(), '%Y-%m-%d %H_%M_%S')))
+        try:
+            if self.default['data']:
+                self.default['DataFolder'] = self.default['data'] + "/" + self.default['DataFolder']
+            if self.default['out']:
+                self['PlotSave'] = self.default['out'] + "/" + self['PlotSave']
+                self.default['PlotSave'] = self.default['out'] + "/" + self.default['PlotSave']
+        except KeyError:
+            pass
+        if self['init'] == 'Histogram':
+            self['total_lines'] = sum(sub_dict['cycles'] for sub_dict in self['sim'])
+        elif self['init'] == 'Variable':
+            self['total_lines'] = len(self['arg_list']) * len(self['sim'])
+
+        if not self['PlotTitle']:
+            # self['PlotTitle'] = self['PlotSave'].split("/")[-1].split(".")[0] + "\n"
+            self['PlotTitle'] = _msplit(self['PlotSave'], "/", ".")[-1] + "\n"
+        else:
+            self['PlotTitle'] += "\n"
+
+
+        return None
+
+
     def warnings(self):
         if not self.warning_list:
             return (bcolors.OKGREEN + "\n" + " No Warnings! ".center(100, "-") + "\n" + bcolors.ENDC)
@@ -164,10 +198,10 @@ class _check:
 
     def __init__(self, core_dict):
         self.core_dict = core_dict
-        self.errors = ""
+        self.errors = []
 
     def give(self):
-        return (self.core_dict, self.errors)
+        return (self.core_dict, "\n".join(set(self.errors)))  # removes repeats from self.errors
 
     def Visual(self, name):
         if core_dict['visual'] == 'confidence':
@@ -204,17 +238,17 @@ class _check:
                 if not item:
                     cntr += 1
             if cntr != 0:
-                self.errors += ("\n- ({0}) was not declared at the top level, and you are missing a"
-                    " ({0}) declaration in ({1}) simulation(s)".format(name, cntr))
+                self.errors += ["- ({0}) was not declared at the top level, and you are missing a"
+                    " ({0}) declaration in ({1}) simulation(s)".format(name, cntr)]
         else:
             cntr = 0
             for item in checklist['low_{}'.format(name)]:
                 if item:
                     cntr += 1
             if cntr != 0:
-                self.errors += ("\n- ({0}) was declared at the top level, but "
+                self.errors += ["- ({0}) was declared at the top level, but "
                 "you have ({0}) declarations in ({1}) simulation(s).".format(
-                    name, cntr))
+                    name, cntr)]
             else:
                 for sub_dict in self.core_dict['sim']:
                     sub_dict['{}'.format(name)] = \
@@ -227,8 +261,8 @@ class _check:
         Checks if 'name' exists in the core_dict
         """
         if name not in self.core_dict.keys():
-            self.errors += "\n- You are missing a top-level ({}) declaration.".format(
-                name)
+            self.errors += ["- You are missing a top-level ({}) declaration.".format(
+                name)]
         else:
             pass
         return None
@@ -245,35 +279,19 @@ class _check:
                 checklist['low_{}'.format(name)][i] = True
         if (checklist['low_{}'.format(name)]
             != [True] * len(self.core_dict['sim'])):
-            self.errors += "\n- You are missing at least one simulation ({}) declaration.".format(
-                name)
+            self.errors += ["- You are missing at least one simulation ({}) declaration.".format(
+                name)]
         return None
 
 
     def Save(self):
         """
-        Checks the save format for .pdf or .png. It returns an error otherwise.
+        Checks the save format for .pdf or .png. It returns an eror otherwise.
         """
-        self.core_dict.setdefault('PlotSave', 'temp.pdf')
-        if ('.pdf' not in self.core_dict['PlotSave'][-4:]
-            and '.png' not in self.core_dict['PlotSave'][-4:]):
-            self.errors += ("\n- PlotSave: You can only save a plot as a '.pdf' or '.png'. PDF is "
-                "the recommended file type for image quality reasons.")
-        self.core_dict['PlotSave'] = 'Output/' + self.core_dict['PlotSave']
-        return None
-
-
-    def Title(self):
-        """
-        Checks if a title exists; if one desn't it generates one from the file
-        name, and if one does it adds a newline below for formatting.
-        """
-        self.core_dict.setdefault('PlotTitle', False)
-        if not self.core_dict['PlotTitle']:
-            self.core_dict['PlotTitle'] = \
-                self.core_dict['PlotSave'].split("/")[-1].split(".")[0] + "\n"
-        else:
-            self.core_dict['PlotTitle'] += "\n"
+        if (not self.core_dict['PlotSave'].endswith(".pdf")
+            and not self.core_dict['PlotSave'].endswith(".png")):
+            self.errors += ["- PlotSave: You can only save a plot as a '.pdf' or '.png'. PDF is "
+                "the recommended file type for image quality."]
         return None
 
 
@@ -308,10 +326,10 @@ class _check:
             checklist['args'] = True
 
         if checklist['linspace'] and checklist['args']:
-            self.errors += ("\n- Declare either (domain and samples) or (args), not both.")
+            self.errors += ["- Declare either (domain and samples) or (args), not both."]
 
         elif not checklist['linspace'] and not checklist['args']:
-            self.errors += ("\n- You must declare either (domain and samples) or (args).")
+            self.errors += ["- You must declare either (domain and samples) or (args)."]
         else:
             try:
                 self.core_dict['arg_list'] = np.linspace(

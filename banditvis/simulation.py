@@ -20,14 +20,14 @@ class Simulation:
 
     """
 
-    def __init__(self, bandit_object, algorithm_object):
+    def __init__(self, bandit_inst, algorithm_inst):
         """
         Initializes the Simulation class, and passes certain attributes so that
         Bandit objects and Algorithm objects have acces to certain information.
         """
-        self.alg = algorithm_object
-        self.bandit = bandit_object
-        self.alg.bandit = bandit_object
+        self.alg = algorithm_inst
+        self.bandit = bandit_inst
+        self.alg.bandit = bandit_inst
         self.total_regret = 0
         self.iterations = 0
         self.arm_info = [each_arm.info for each_arm in self.bandit.arms]
@@ -220,12 +220,12 @@ class ObjectDict:
         'greedy' : greedy,
         'greedy_ep' : greedy_ep,
         'UCB' : UCB,
-        'KL_UCB' : KL_UCB,
+        'UCB_KL' : UCB_KL,
         'TS_Beta' : TS_Beta,
         'TS_Gauss' : TS_Gauss,
         'Bayes_Gauss' : Bayes_Gauss,
-        'Lin_UCB' : Lin_UCB,
-        'Lin_TS' : Lin_TS
+        'UCB_Lin' : UCB_Lin,
+        'TS_Lin' : TS_Lin
     }
     IndexDict = {
         'B1' : B1,

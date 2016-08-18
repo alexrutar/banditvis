@@ -11,21 +11,19 @@ from .data import *
 from .animation import *
 from .formatting import bcolors
 
-def _getInput(input_file):
+def _checkInput(**arg_dict):
     """
     Gets the input from the user commmand and checks it for potential errors.
     """
-    if not input_file:
-        input_file = sys.argv[1]
+
+    if arg_dict['input'].endswith('.txt'):
+        pass
+    else:
+        sys.exit("ERROR: You need to input a .txt file.")
     try:
-        if input_file.endswith('.txt'):
-            pass
-        else:
-            sys.exit("ERROR: You need to input a .txt file.")
-    except IndexError:
-        sys.exit("ERROR: You need to specify a file.")
-    try:
-        core_dict = Parse("{}".format(input_file))
+        input_file = arg_dict['input']
+        del(arg_dict['input'])
+        core_dict = Parse("{}".format(input_file), **arg_dict)
     except FileNotFoundError:
         sys.exit("ERROR: The file '{}' you tried to input doesn't exist in the current directory.".format(input_file))
     return core_dict
@@ -47,7 +45,7 @@ class _statusThread(th.Thread):
             current = [0] * self.n_files
             try:
                 for i in range(self.n_files):
-                    with open("{}/data{}.txt".format(self.core_dict['DataFolder'],i), 'r') as file:
+                    with open("{}/data{}.txt".format(self.core_dict['DataFolder'], i), 'r') as file:
                         current[i] += sum(1 for line in file) - 1
             except FileNotFoundError:
                 pass
@@ -55,8 +53,8 @@ class _statusThread(th.Thread):
             sys.stdout.flush()
 
 
-def run(input_file=False):
-    core_dict = _getInput(input_file)
+def run(**arg_dict):
+    core_dict = _checkInput(**arg_dict)
     pool = mp.Pool(core_dict['Multiprocess'], _init_worker)
     core_dict.state()
 

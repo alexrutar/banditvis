@@ -44,6 +44,7 @@ class mpl_defaults:
         plt.rcParams['legend.edgecolor'] = '#e6e6e6'
         plt.rcParams['legend.facecolor'] = '#ffffff'
         plt.rcParams['legend.numpoints'] = 1
+
         fig = plt.figure(figsize=(14,9), facecolor='white')
         ax = fig.add_subplot(111, axisbg='white')
 
@@ -74,8 +75,8 @@ class mpl_defaults:
         fig = plt.figure()
         ax = fig.add_subplot(111)
 
-        ax.spines['right'].set_color('none')
-        ax.spines['top'].set_color('none')
-        ax.spines['left'].set_color('none')
+        ax.spines['right'].set_visible(False)
+        ax.spines['top'].set_visible(False)
+        ax.spines['left'].set_visible(False)
 
         return (fig, ax)

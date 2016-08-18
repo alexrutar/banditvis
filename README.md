@@ -66,7 +66,7 @@ Comments are done python-style with a hash (`#`), and whitespace and blank lines
 
     Simulation 1:
         Algorithm:
-            algtype: KL_UCB
+            algtype: UCB_KL
             incr: B7
         Bandit:
             ArmList:
@@ -169,7 +169,7 @@ Every `Visualize` init takes only a single simulation class within the declarati
 
     Simulation:
         Algorithm:
-            algtype: Lin_TS
+            algtype: TS_Lin
         Bandit:
             ArmList:
             - [Linear, [1., 1.]]
@@ -191,7 +191,7 @@ The ellipse visualization takes a 2D linear bandit; when run, it displays the ar
 - `NoAxesTick`: Option the plot easier to view. If True it removes axes ticks and labels. Defaults to False.
 - `HelpLines`: display extension of the mean vector, and perpindicular projections of the arm vectors onto it to see the mean reward that would be recieved from a given arm. Defaults to True.
 - `FPS`: Control the animation update rate. If the animation is running too slowly on your computer, you can decrease this number. Defults to 20.
-- `LevelCurves`: For the Lin_TS algorithm, it will display level curves. It is meaningless in any other situation. Defaults to True.
+- `LevelCurves`: For the TS_Lin algorithm, it will display level curves. It is meaningless in any other situation. Defaults to True.
 
 ### The `confidence` visual
     init: Visualize
@@ -202,7 +202,7 @@ The ellipse visualization takes a 2D linear bandit; when run, it displays the ar
 
     Simulation 1:
         Algorithm:
-            algtype: KL_UCB
+            algtype: UCB_KL
             incr: B3
         Bandit:
             ArmList:
@@ -234,44 +234,45 @@ When you are preparing an input file, you can use this section to determine comp
 Algorithms describe the behaviour of the bandit arm-choosing behaviour. Here is a list of the currently supported algorithms (called using `algtype`), with description, compatibility, and additional arguments needed as support:
 - `random`:
   - Bandit Support: Bernoulli, Normal
-  - init Support: Histogram, Variable
+  - `init` support: Histogram, Variable
   - Additional Arguments: none
 - `greedy`:
   - Bandit Support: Bernoulli, Normal
-  - init Support: Histogram, Variable
+  - `init` support: Histogram, Variable
   - Additional Arguments: none
 - `greedy_ep`:
   - Bandit Support: Bernoulli, Normal
-  - init Support: Histogram, Variable
+  - `init` support: Histogram, Variable
   - Additional Arguments: `epsilon`
 - `UCB`:
   - Bandit Support: Bernoulli, Normal
-  - init Support: Histogram, Variable, Visualize {confidence}
+  - `init` support: Histogram, Variable, Visualize {confidence}
   - Additional Arguments: `incr`, `alpha`
-- `KL_UCB`:
+- `UCB_KL`:
   - Bandit Support: Bernoulli
-  - init Support: Histogram, Variable, Visualize {confidence}
+  - `init` support: Histogram, Variable, Visualize {confidence}
   - Additional Arguments: `incr`
-- `Bayes_Gauss`:
-  - Bandit Support: Normal
-  - init Support: Histogram, Variable, Visualize {confidence}
-  - Additional Arguments: `incr`
+- `UCB_Lin`:
+  - Bandit Support: Linear
+  - `init` support: Histogram, Variable, Visualize {ellipse}
+  - Additional Arguments: none
 - `TS_Beta`:
   - Bandit Support: Bernoullli
-  - init Support: Histogram, Variable
+  - `init` support: Histogram, Variable, Visualize {distribution}
   - Additional Arguments: none
 - `TS_Gauss`:
   - Bandit Support: Normal
-  - init Support: Histogram, Variable
+  - `init` support: Histogram, Variable, Visualize {distribution}
   - Additional Arguments: none
-- `Lin_UCB`:
+- `TS_Lin`:
   - Bandit Support: Linear
-  - init Support: Histogram, Variable, Visualize {ellipse}
+  - `init` support: Histogram, Variable, Visualize {ellipse}
   - Additional Arguments: none
-- `Lin_TS`:
-  - Bandit Support: Linear
-  - init Support: Histogram, Variable, Visualize {ellipse}
-  - Additional Arguments: none
+- `Bayes_Gauss`:
+  - Bandit Support: Normal
+  - `init` support: Histogram, Variable, Visualize {confidence}
+  - Additional Arguments: `incr`
+
 
 ### The `Bandit` Sub-Class
 ### Additional Arguments

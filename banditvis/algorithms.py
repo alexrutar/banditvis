@@ -68,7 +68,7 @@ def UCB(bandit, var_dict):
 
 
 
-def KL_UCB(bandit, var_dict):
+def UCB_KL(bandit, var_dict):
     """
     KL Upper Confidence Bound algorithm.
 
@@ -184,7 +184,7 @@ def TS_Gauss(bandit, var_dict):
     return np.argmax(bandit.U_conf)
 
 
-def Lin_UCB(bandit, var_dict):
+def UCB_Lin(bandit, var_dict):
     """
     Finite Linear Upper Confidence Bound algorithm
 
@@ -202,7 +202,7 @@ def Lin_UCB(bandit, var_dict):
 
     return np.argmax(bandit.U_conf)
 
-def Lin_TS(bandit, var_dict):
+def TS_Lin(bandit, var_dict):
     """
     Does Thompson Sampling from the multivariate distribution with mean
     bandit.U and covariance inv(bandit.G)

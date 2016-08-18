@@ -368,7 +368,7 @@ def EllipseAnimation(core_dict):
             label='True Mean')
 
         # plot the ellipse and the mean; checks for LevelCurves option
-        if (sim.alg.var_dict['algtype'].__name__ == "Lin_TS"
+        if (sim.alg.var_dict['algtype'].__name__ == "TS_Lin"
             and core_dict['LevelCurves'] == True):
             for i in [33, 29, 25, 21, 17, 13, 9, 5, 1]:
                 plot_ellipse(i, G_inv, bandit_mean,

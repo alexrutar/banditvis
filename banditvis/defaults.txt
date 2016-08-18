@@ -1,6 +1,5 @@
-
-
-
+# Core Defaults, do not touch these
+out: hi
 Animate: False
 FPS: 20
 HelpLines: True
@@ -9,4 +8,8 @@ LevelCurves: True
 Multiprocess: 1
 NoAxesTick: False
 Normalized: False
-PlotSave: "Output/temp.pdf"
+PlotSave: "temp.pdf"
+
+# User added defaults, these will overwrite the Core Defaults
+out: Output
+data: Data
