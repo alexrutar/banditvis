@@ -7,15 +7,8 @@ import yaml
 from datetime import datetime
 from pprint import pprint
 
+from .commands import msplit
 from .formatting import bcolors
-
-def _msplit(text, *limiters):
-    """
-    splits 'text' at every occurrence of limiter
-    """
-    for limit in limiters:
-        text = text.replace(limit, '$!!7=4+[4}|[2')
-    return text.split('$!!7=4+[4}|[2')
 
 
 def Parse(user_file, **arg_dict):
@@ -125,9 +118,9 @@ class CoreDict(dict):
             if v == None:
                 del(arg_dict[k])
         try:
-            default_txt = yaml.load(open("/".join(__file__.split('/')[:-1]) + "/defaults.txt", 'r'))
+            default_txt = yaml.load(open("/".join(__file__.split('/')[:-1]) + "/defaults.py", 'r'))
         except FileNotFoundError:
-            sys.exit("oh")
+            sys.exit("Could not find defaults file at: " + "/".join(__file__.split('/')[:-1]) + "/defaults.py")
         self.default = {**default_txt, **arg_dict}  # add the arg_dict arguments to overwrite any defaults
         self.ignore = {'InputData', 'DataFolder', 'Animate'}
         self.warning_list = []
@@ -159,14 +152,20 @@ class CoreDict(dict):
             pass
         if self['init'] == 'Histogram':
             self['total_lines'] = sum(sub_dict['cycles'] for sub_dict in self['sim'])
+            if not self['PlotTitle']:
+                # self['PlotTitle'] = self['PlotSave'].split("/")[-1].split(".")[0] + "\n"
+                self['PlotTitle'] = _msplit(self['PlotSave'], "/", ".")[-1] + "\n"
+            else:
+                self['PlotTitle'] += "\n"
+
+
         elif self['init'] == 'Variable':
             self['total_lines'] = len(self['arg_list']) * len(self['sim'])
-
-        if not self['PlotTitle']:
-            # self['PlotTitle'] = self['PlotSave'].split("/")[-1].split(".")[0] + "\n"
-            self['PlotTitle'] = _msplit(self['PlotSave'], "/", ".")[-1] + "\n"
-        else:
-            self['PlotTitle'] += "\n"
+            if not self['PlotTitle']:
+                # self['PlotTitle'] = self['PlotSave'].split("/")[-1].split(".")[0] + "\n"
+                self['PlotTitle'] = _msplit(self['PlotSave'], "/", ".")[-1] + "\n"
+            else:
+                self['PlotTitle'] += "\n"
 
 
         return None

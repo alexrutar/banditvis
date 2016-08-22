@@ -3,7 +3,9 @@ from .manager import run
 import time
 import sys
 
+def main():
+    run(**get_args())
 
 if __name__ == "__main__":
-    run(**get_args())
+    main()
 

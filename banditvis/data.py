@@ -25,6 +25,7 @@ def _fix_vars(obj, variable):
     return obj
 
 
+
 def _makeHist(i, sub_dict, core_dict):
     file_name = "{}/data{}.txt".format(core_dict['DataFolder'], i)
     temp_dict = copy.deepcopy(sub_dict)

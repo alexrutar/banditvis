@@ -6,26 +6,7 @@ import numpy as np
 from .data import VarData
 from .simulation import ReMapSim
 from .formatting import cmap_colors, mpl_defaults
-
-
-def _safe_plot_save(file_name):
-    """Save a plot safely."""
-    if file_name.split("/")[-1][:4] == 'temp':
-        plt.savefig(file_name)
-    elif not os.path.isfile(file_name):
-        plt.savefig(file_name)
-    else:
-        for i in range(100000):
-            if os.path.isfile(file_name.split(".")[0]
-                + "{}.".format(i)
-                + file_name.split(".")[1]):
-                pass
-            else:
-                plt.savefig(file_name.split(".")[0]
-                    + "{}.".format(i)
-                    + file_name.split(".")[1])
-                break
-    return None
+from .commands import safe_save
 
 
 def VarPlot(core_dict):
@@ -36,7 +17,7 @@ def VarPlot(core_dict):
     input dictionary. The loop iterates over files in that folder, and for each
     one adds a plot to the figure.
 
-    Uses _safe_plot_save to save the plot when finished.
+    Uses plt.savefig to save the plot when finished.
 
     TODO:
     * add proper label support from user input
@@ -67,7 +48,7 @@ def VarPlot(core_dict):
     plt.title(core_dict['PlotTitle'], style='italic')
 
     # save plot
-    _safe_plot_save(core_dict['PlotSave'])
+    plt.savefig(safe_save(core_dict['PlotSave']))
 
     return None
 
@@ -80,7 +61,7 @@ def HistPlot(core_dict):
     input dictionary. The loop iterates over files in that folder, and for each
     one adds a plot to the figure.
 
-    Uses _safe_plot_save to save the plot when finished.
+    Uses plt.savefig to save the plot when finished.
 
     TODO:
     * move HistData out of this function
@@ -118,6 +99,6 @@ def HistPlot(core_dict):
     plt.title(core_dict['PlotTitle'], style='italic')
 
     # save plot
-    _safe_plot_save(core_dict['PlotSave'])
+    plt.savefig(safe_save(core_dict['PlotSave']))
 
     return None
