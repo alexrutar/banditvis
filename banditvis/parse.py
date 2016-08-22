@@ -152,20 +152,15 @@ class CoreDict(dict):
             pass
         if self['init'] == 'Histogram':
             self['total_lines'] = sum(sub_dict['cycles'] for sub_dict in self['sim'])
-            if not self['PlotTitle']:
-                # self['PlotTitle'] = self['PlotSave'].split("/")[-1].split(".")[0] + "\n"
-                self['PlotTitle'] = _msplit(self['PlotSave'], "/", ".")[-1] + "\n"
-            else:
-                self['PlotTitle'] += "\n"
-
 
         elif self['init'] == 'Variable':
             self['total_lines'] = len(self['arg_list']) * len(self['sim'])
-            if not self['PlotTitle']:
-                # self['PlotTitle'] = self['PlotSave'].split("/")[-1].split(".")[0] + "\n"
-                self['PlotTitle'] = _msplit(self['PlotSave'], "/", ".")[-1] + "\n"
-            else:
-                self['PlotTitle'] += "\n"
+
+        if not self['PlotTitle']:
+            # self['PlotTitle'] = self['PlotSave'].split("/")[-1].split(".")[0] + "\n"
+            self['PlotTitle'] = _msplit(self['PlotSave'], "/", ".")[-1] + "\n"
+        else:
+            self['PlotTitle'] += "\n"
 
 
         return None

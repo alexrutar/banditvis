@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name='banditvis',
-    version='0.1',
+    version='0.2',
     description='A library for simulating and visualizing bandit algorithms.',
     url='https://github.com/alexrutar/banditvis',
     author='Alex Rutar',

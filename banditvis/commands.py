@@ -27,6 +27,8 @@ def get_args():
         help="The path to the data directory, defaults to the current directory.")
     parser.add_argument("-o", "--out", nargs='?',
         help="The path to the output location, defaults to the current directory.")
+    parser.add_argument("-D", "--delete", action='store_true',
+        help="Delete intermediate data files.")
     args = parser.parse_args()
     print(vars(args))
     return vars(args)

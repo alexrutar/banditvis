@@ -4,6 +4,7 @@ from pprint import pprint
 import sys
 import time
 import signal
+import os
 
 from .parse import Parse
 from .plot import *
@@ -91,6 +92,14 @@ def run(**arg_dict):
                 DistAnimation(core_dict)
 
         print("\n\n" + bcolors.OKGREEN + " Done! ".center(100,"-") + bcolors.ENDC + "\n")
+
+        if core_dict['delete'] or core_dict['DeleteData']:
+            path = core_dict['DataFolder']
+            for i in range(len(core_dict['sim'])):
+                os.remove(path + "/data{}.txt".format(i))
+            os.rmdir(path)
+
+
     except KeyboardInterrupt:
         pool.terminate()
         pool.join()
