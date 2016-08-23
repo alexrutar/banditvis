@@ -1,18 +1,20 @@
+"""
+This module contains the various Bandit classes {StoBandit, LinBandit, AdvBandit} and the Algorithm
+class.
+"""
+
 import numpy as np
 from numpy.linalg import inv
 
-
-class Bandit:
+__all__ = [StoBandit, LinBandit, AdvBandit, Algorithm]
+class StoBandit:
 
     """
-    The basic Bandit class.
+    This bandit class simulates a single-dimensional `Sto`chastic bandit.
 
-    The Bandit class defines the bandit itself. As an argument, it takes a list
-    of arm objects, defining the behaviour of the environment. When the
-    Bandit.pullArm(n) method is called, the n^th arm (indexed from 0) is
-    pulled, updating various information stored within the bandit. This
-    information is stored as follows:
-
+    Positional Arguments:
+        * arm object
+    Properties:
         * Bandit.arms : list of arms objects within the bandit, which contains:
             * Bandit.arms[n].mean : the mean of the n^th arm
             * Bandit.arms[n].info : info about the n_th arm
@@ -29,38 +31,16 @@ class Bandit:
         * Bandit.arm_reward : the reward that each arm has so far
         * Bandit.reward : the reward that the Bandit recieved after the
             previous timestep
-
-    The Bandit class also contains an interactive method called by
-    Bandit.pullArm(n). The algorithm does the following:
-
-        * pulls the n^th arm
-        * increments T[n]
-        * increments timestep
-        * updates U[n] in a linear fashion (so that U[n] is simply an
-            unweighted average of all previous rewards)
-        * increments total_reward and arm_reward[n] to store the information
-
-    The method Bandit.reset() reverts the Bandit to the original state in which
-    it started, while still storing the arms; it resets tracking information.
-    There is also a method called by Bandit.fullInfo(), which returns a large
-    amount of information about the bandit. This is mostly good for trouble-
-    shooting and examining the behaviour of the bandit in detail. Specifically,
-    it gives the following information:
-
-        * for each arm :
-            * the mean of the distribution
-            * the current system average
-            * the number of pulls
-            * confidence
-        * the number of arms
-        * the timestep
-        * the horizon
-        * the total reward
+    Methods:
+        * pullArm(arm): pull a specific arm
+        * giveRegret(): calculate the current regret
+        * reset(): reset all timestep-based properties
+        * fullInfo(): print information about the bandit
     """
 
-    def __init__(self, arm_type_object):
-        self.arms = arm_type_object
-        self.n_arms = len(arm_type_object)
+    def __init__(self, arm_object_list):
+        self.arms = arm_object_list
+        self.n_arms = len(arm_object_list)
         self.T = np.zeros(self.n_arms, dtype=np.int)
         self.U = np.zeros(self.n_arms)
         self.U_conf = np.zeros(self.n_arms)
@@ -70,7 +50,6 @@ class Bandit:
 
         self.mean_list = np.array([self.arms[arm].mean
             for arm in range(self.n_arms)])
-
 
 
     def giveRegret(self):
@@ -139,24 +118,31 @@ class LinBandit:
     Bandit. However, it differs in the way in which is stores averages, and
     takes different arm arguments.
 
-    It takes a list of Linear arms and a vector mean to initialize.
-
-    If the normalized option is True, it preserves vector direction but makes
-    each vector unit length. It stores the following information internally:
-        * self.normalized: boolean for normalized
-        * self.mean: the vector mean
-        * self.n_arms: the number of arms
-        * self.T: the number of pulls of each arm
-        * self.arms: the arm_object_list input
-        * self.dim: dimension
-        * self.arm_vecs: a list of the arm vectors
-        * self.G: the gram matrix, initialized with the identity to ensure
+    Positional Arguments:
+        * list of arm objects
+        * vector mean
+    Keyword Arguments:
+        * normalized: boolean
+    Properties:
+        * normalized: boolean for normalized (all vectors length 1)
+        * mean: the vector mean
+        * n_arms: the number of arms
+        * T: the number of pulls of each arm
+        * arms: the arm_object_list input
+        * dim: dimension
+        * arm_vecs: a list of the arm vectors
+        * G: the gram matrix, initialized with the identity to ensure
             invertibility
-        * self.U: the system average vector
-        * self.A: the sum of arm vectors chosen multiplied by the scalar reward
+        * U: the system average vector
+        * A: the sum of arm vectors chosen multiplied by the scalar reward
             it recieved
-        * self.U_conf: the confidence value for each arm
-        * self.timestep: the timestep
+        * U_conf: the confidence value for each arm
+        * timestep: the timestep
+    Methods:
+        * pullArm(arm): pull a specific arm
+        * giveRegret(): calculate the current regret
+        * reset(): reset all timestep-based properties
+        * fullInfo(): print information about the bandit
     """
     def __init__(self, arm_object_list, vector_mean, normalized=False):
         self.normalized = normalized
@@ -181,7 +167,8 @@ class LinBandit:
         self.timestep += 1  # update timesetp
 
         # self.G is the sum of the products X X^T of the arm pulled in each round X
-        self.G += np.outer(self.arm_vecs[arm], self.arm_vecs[arm])  # self.arm_vecs[arm] is the arm vector for a given [arm]
+        # self.arm_vecs[arm] is the arm vector for a given [arm]
+        self.G += np.outer(self.arm_vecs[arm], self.arm_vecs[arm])
 
         # self.A is the sum of the arm vector pulled so far, scaled by the reward each pull resulted in
         self.A += self.arm_vecs[arm] * self.arms[arm].pull()

@@ -10,12 +10,15 @@ from pprint import pprint
 class Simulation:
 
     """
-    The Simulation class combines the Bandit - Algorithm interaction.
+    Class to combine the Bandit - Algorithm interaction.
 
-    It stores various information about the interaction, and it contains
-    various execution methods which are useful depending on the context, and
-    various file output methods that are called by other files that need to
-    simulate a bandit and access the saved data.
+    Args:
+        bandit_inst: first argument is an instance of a Bandit (StoBandit, LinBandit, AdvBandit)
+        algorithm_inst: second argument is an instance of an Algorithm
+
+    Methods:
+        ()
+        reset()
 
     TODO:
     * what else to track? total reward, calculate regret, ...
@@ -260,15 +263,15 @@ def ReMapSim(sim_dict):
         for arm in sim_dict['Bandit']['ArmList']]
 
     # different parsing for Linear and non-Linear bandits
-    if sim_dict['Bandit']['ArmList'][0][0] == 'Linear':
+    if sim_dict['Bandit']['ArmList'][0][0] in ('Linear'):
         sim_dict['vector_mean'] = sim_dict['Bandit']['MeanVector']
         sim_dict['Bandit'] = LinBandit(
             sim_dict['arm_object_list'],
             sim_dict['vector_mean'],
             normalized=sim_dict['Normalized'])
         del[sim_dict['vector_mean']]
-    else:
-        sim_dict['Bandit'] = Bandit(sim_dict['arm_object_list'])
+    elif sim_dict['Bandit']['ArmList'][0][0] in ('Bernoulli', 'Normal'):
+        sim_dict['Bandit'] = StoBandit(sim_dict['arm_object_list'])
 
     sim_dict['Simulation'] = Simulation(
         sim_dict['Bandit'],

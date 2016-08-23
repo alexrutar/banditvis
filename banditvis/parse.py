@@ -7,7 +7,7 @@ import yaml
 from datetime import datetime
 from pprint import pprint
 
-from .commands import msplit
+from .helper import msplit
 from .formatting import bcolors
 
 

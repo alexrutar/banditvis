@@ -1,4 +1,5 @@
 import argparse
+import os
 
 # parser = argparse.ArgumentParser(description="A command line interface for the banditvis module.")
 
@@ -19,24 +20,21 @@ def safe_save(file_name):
                     + "{}.".format(i)
                     + file_name.split(".")[1])
 
-def get_args():
-    parser = argparse.ArgumentParser(prog='banditvis')
-    parser.add_argument("input",
-        help="The path to your .txt input file.")
-    parser.add_argument("-d", "--data", nargs='?',
-        help="The path to the data directory, defaults to the current directory.")
-    parser.add_argument("-o", "--out", nargs='?',
-        help="The path to the output location, defaults to the current directory.")
-    parser.add_argument("-D", "--delete", action='store_true',
-        help="Delete intermediate data files.")
-    args = parser.parse_args()
-    print(vars(args))
-    return vars(args)
-
-
 def msplit(text, *limiters):
     """
-    splits 'text' at every occurrence of limiter
+    Like split, but separates a string at multiple places.
+
+    Args:
+        text: a string that you want to split
+        *limiters: strings that you want to split at
+    Returns:
+        A list of strings
+
+    Examples:
+
+    >>> msplit("example test string here!", 'p', 'g')
+    ['exam', 'le test strin', ' here!']
+
     """
     for limit in limiters:
         text = text.replace(limit, '$!!7=4+[4}|[2')

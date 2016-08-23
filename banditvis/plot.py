@@ -6,7 +6,7 @@ import numpy as np
 from .data import VarData
 from .simulation import ReMapSim
 from .formatting import cmap_colors, mpl_defaults
-from .commands import safe_save
+from .helper import safe_save
 
 
 def VarPlot(core_dict):
