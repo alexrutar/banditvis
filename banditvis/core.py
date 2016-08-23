@@ -6,7 +6,7 @@ class.
 import numpy as np
 from numpy.linalg import inv
 
-__all__ = [StoBandit, LinBandit, AdvBandit, Algorithm]
+__all__ = ['StoBandit', 'LinBandit', 'Algorithm']
 class StoBandit:
 
     """
