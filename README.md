@@ -1,15 +1,19 @@
 # Intro
+
 This Bandit Visualization module provides an easy-to-use library for implementing and visualizing various Bandit algorithms and environments in machine learning. If you are looking for the following, this library is not for you:
+
 - You want something fast and efficient
 - You want a tool to run very large simulations
 
 It is good to use if you want to
+
 - Visualize your algorithms in various ways
 - Quickly make nice looking graphs
 - Have the support of a super-straightforward minilanguage
 - Have a command-line tool and a module you can import
 
 The library is implemented in python3. This library is dependent also on the following modules, and you must have them installed to run this:
+
 - pyyaml (text parsing)
 - numpy (math)
 - scipy (stats)
@@ -29,6 +33,7 @@ banditvis -h
 ```
 
 # Table of Contents
+
   * [Usage Tutorial](#usage-tutorial)
     * [Using the Command Line Interface](#using-the-command-line-interface)
     * [Minilanguage Syntax](#minilanguage-syntax)
@@ -51,11 +56,15 @@ banditvis -h
     * [Notes](#notes)
 
 # Usage Tutorial
+
 ## Using this Tutorial
+
 This tutorial outlines the minilanguage syntax using example files. All these files can be found in the *Documentation* folder or you can copy-paste them directly. It is most instructive to run the files and see what they produce as an example.
 
 ## Minilanguage Syntax
+
 The first line of the file always contains an `init: ` plus a declaration. Here are three types of supported declarations right now, with a brief description of each:
+
 - `Histogram` : makes a histogram, aggregating the regret from a large number of simulations
 - `Variable` : makes a line plot, varying a user-controlled parameter
 - `Visualize` : runs an animation on a single cycle
@@ -73,6 +82,7 @@ There are also other various arguments, such as `PlotTitle`, `PlotSave`, and `An
 Comments are done python-style with a hash (`#`), and whitespace and blank lines are conveniently ignored. For file examples, see the following three sections.
 
 ## The `Histogram` init
+
     init: Histogram  # comments done python-style
 
     horizon: 500
@@ -112,6 +122,7 @@ The `PlotTitle` argument provides a name for your file. If it is left blank, the
 If Animate is set to True, an animation window will open and display a live build of the first simulation histogram as it runs, and will continue to run the simulation on a different process. If you close the animation window, the program will still run to completion and save the graph.
 
 ## The `Variable` init
+
     init: Variable
 
     Var:
@@ -168,7 +179,9 @@ In the example shown, the mean of each Normal arm varies between 0.01 and 0.29, 
 **Warning: Variable plots use `eval` to evaluate the `&&` substitutions. This results in arbitrarily increased power for good (you can use numpy functions, etc.) but it also means that it can evaluate almost anything!**
 
 ## The `Visualize` init
+
 The `Visualize` init is arguably the most interesting because it runs active animations of Bandit algorithms within a single cycle. The input file must also contain a `visual` argument, in order to determine the type of animation to be run. The currently supported arguments are
+
 - `ellipse` - animation of a scalar upper confidence bound used in many algorithms
 - `confidence` - animation of the confidence ellipse used by certain linear bandit algorithms
 - `distribution` - animation of the distribution used by Thompson Sampling and Bayes Confidence Bound algorithms
@@ -176,6 +189,7 @@ The `Visualize` init is arguably the most interesting because it runs active ani
 Every `Visualize` init takes only a single simulation class within the declaration; anything more will be ignored. Furthermore, for a full list of compatibility simulation compatiblility, look in the [Argument Summary](#argument-summary) section.
 
 ### The `ellipse` visual
+
     init: Visualize
     visual: ellipse
 
@@ -201,6 +215,7 @@ Every `Visualize` init takes only a single simulation class within the declarati
     HelpLines: True
     FPS: 20
 The ellipse visualization takes a 2D linear bandit; when run, it displays the arm vectors, the actual mean, and the confidence ellipse, as the simulation progresses. There are also some additional optional arguments within the Simulation declaration:
+
 - `Normalized`: This is a more general Linear Bandit argument that takes every arm and mean vector, preserving the direction but dividing by the length. Defaults to False.
 - `NoAxesTick`: Option the plot easier to view. If True it removes axes ticks and labels. Defaults to False.
 - `HelpLines`: display extension of the mean vector, and perpindicular projections of the arm vectors onto it to see the mean reward that would be recieved from a given arm. Defaults to True.
@@ -208,6 +223,7 @@ The ellipse visualization takes a 2D linear bandit; when run, it displays the ar
 - `LevelCurves`: For the TS_Lin algorithm, it will display level curves. It is meaningless in any other situation. Defaults to True.
 
 ### The `confidence` visual
+
     init: Visualize
 
     horizon: 5000
@@ -226,7 +242,9 @@ The ellipse visualization takes a 2D linear bandit; when run, it displays the ar
         label: "TS Beta"
 
 There isn't much to say here. Just try it.
+
 ### The `distribution` visual
+
     init: Visualize
     visual: distribution
 
@@ -242,15 +260,17 @@ There isn't much to say here. Just try it.
             - [Bernoulli, [0.3]]
 
 You can also just try this one too.
+
 ## Additional Features
+
 **Command Line Options:**
 
-| Argument      | Meaning        |
-|:------------- |:--------------:|
-| -h, --help    | get help info  |
-| -d, --data    | directory to place data files in  |
+| Argument      | Meaning                              |
+|:------------- |:------------------------------------:|
+| -h, --help    | get help info                        |
+| -d, --data    | directory to place data files in     |
 | -o, --out     | directory to place output files in   |
-| --delete      | delete data files when finished |
+| --delete      | delete data files when finished      |
 
 To use a flag, write the flag, a space, then the argument. Escape spaces with `\`. For example,
 ```
@@ -259,19 +279,27 @@ banditvis -o Output\ Folder --delete
 will place the output file in a folder named *Output Folder* and delete the data files.
 
 **Additional Features**
+
 - Error Checking: YAML does the syntax error checking if you have mistyped arguments. There is also a small error parser which tries to catch argument-based errors and inconsistent declarations.
 - Data Saving: The data generated is saved in the Data folder, in a subfolder named using the first four letters of the `init` and a timestamp created when you start the program.
 - Safe Plot Saving: When you specify a plot name, the program attempts to save it without overwriting another file by appending a number to the file name. If you want the existing file under the name to be overwritten, start your file name with `temp`, eg. `temp_plot.pdf` and the program will overwrite any existing file with the same name.
 
 **Future Features**
+
 - Multiprocessing Control: You can specify how many cores you want to use using the `Cores` argument, and it will open the appropriate number of processes to generate the data. This feature is incompatible with the `Animate` argument.
 
 # Argument Summary
+
 ## Using this Summary
+
 When you are preparing an input file, you can use this section to determine compatibliity. For more detail, see the PDF reference file under documentation; this provides a more detailed overview of each algorithm.
+
 ## The `Simulation` Class
+
 ### The `Algorithm` Sub-Class
+
 Algorithms describe the behaviour of the bandit arm-choosing behaviour. Here is a list of the currently supported algorithms (called using `algtype`), with description, compatibility, and additional arguments needed as support:
+
 - `random`:
   - Bandit Support: Bernoulli, Normal
   - `init` support: Histogram, Variable
@@ -313,32 +341,38 @@ Algorithms describe the behaviour of the bandit arm-choosing behaviour. Here is 
   - `init` support: Histogram, Variable, Visualize {confidence}
   - Additional Arguments: `incr`
 
-
 ### The `Bandit` Sub-Class
+
 ### Additional Arguments
+
 The simulation class currently has the following additional arguments:
+
 - `Label`: This is the label used for the Legend, to mark your plot.
+
 ## Additional Arguments
+
 ## Example Files
 Example files can be found in the Example folder. It contains a semi-comprehensive overview of what this program can do.
 
-
 # Module Information
+
 **Note: in the future, this section will likely be moved to the Documentation folder as a PDF / tex file**
 Here is an overview of what the program does:
+
 - The user inputs a file using `python3 run.py user_file.txt` from the command line. `run.py` is the general process manager that calls the appropriate functions when necessary
 - The *user_file* is passed to the *text_parse* module which uses YAML to convert the user input into a rudimentary dictionary. This dictionary is passed to a dictionary checker which checks general consistency and establishes some defaults.
 - Now that the dictionary is finished, it will no longer be modified. It is passed as an argument to the various functions in the *DataGen* module, depending on the type of data that is desired, then passed to the *Plot* module to make various plots. *Histogram* and *Variable* plots depend on generated or existing data to build the plots.
 - For animations, the bandit is run inline using an update function, without generating external data.
 
 ## Overall File Structure
-_(note: the current file structure is temporary and bound to change)_
+*(note: the current file structure is temporary and bound to change)*
 
 ## Rules
+
 ### Multiprocessor Rules
 
-
 ## Notes
+
 The critical importance of core_dict
     everything is stored here; during run.py, it is made by calling Parse on some input file
     once the core_dict is made, you NEVER change it; if you need a local version make a deepcopy
