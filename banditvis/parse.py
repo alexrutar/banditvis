@@ -151,14 +151,14 @@ class CoreDict(dict):
         except KeyError:
             pass
         if self['init'] == 'Histogram':
-            self['total_lines'] = sum(sub_dict['cycles'] for sub_dict in self['sim'])
+            self['total_lines'] = sum(sim_dict['cycles'] for sim_dict in self['sim'])
 
         elif self['init'] == 'Variable':
             self['total_lines'] = len(self['arg_list']) * len(self['sim'])
 
         if not self['PlotTitle']:
             # self['PlotTitle'] = self['PlotSave'].split("/")[-1].split(".")[0] + "\n"
-            self['PlotTitle'] = _msplit(self['PlotSave'], "/", ".")[-1] + "\n"
+            self['PlotTitle'] = msplit(self['PlotSave'], "/", ".")[-1] + "\n"
         else:
             self['PlotTitle'] += "\n"
 
@@ -222,8 +222,8 @@ class _check:
         if name in self.core_dict.keys():
             checklist['top_{}'.format(name)] = True
 
-        for i, sub_dict in enumerate(self.core_dict['sim']):
-            if name in sub_dict.keys():
+        for i, sim_dict in enumerate(self.core_dict['sim']):
+            if name in sim_dict.keys():
                 checklist['low_{}'.format(name)][i] = True
 
         if not checklist['top_{}'.format(name)]:
@@ -244,8 +244,8 @@ class _check:
                 "you have ({0}) declarations in ({1}) simulation(s).".format(
                     name, cntr)]
             else:
-                for sub_dict in self.core_dict['sim']:
-                    sub_dict['{}'.format(name)] = \
+                for sim_dict in self.core_dict['sim']:
+                    sim_dict['{}'.format(name)] = \
                         self.core_dict['{}'.format(name)]
                 del self.core_dict['{}'.format(name)]
         return None
@@ -264,12 +264,12 @@ class _check:
 
     def SimExist(self, name):
         """
-        Checks if 'name' exists in every single simulation sub_dictionary, and
+        Checks if 'name' exists in every single simulation sim_dictionary, and
         adds an error if it doesn't
         """
         checklist = {'low_{}'.format(name) : [False] * len(self.core_dict['sim'])}
-        for i, sub_dict in enumerate(self.core_dict['sim']):
-            if name in sub_dict.keys():
+        for i, sim_dict in enumerate(self.core_dict['sim']):
+            if name in sim_dict.keys():
                 checklist['low_{}'.format(name)][i] = True
         if (checklist['low_{}'.format(name)]
             != [True] * len(self.core_dict['sim'])):
@@ -295,14 +295,14 @@ class _check:
         ties of the bandit.
         """
         self.core_dict['bins'] = []
-        for sub_dict in self.core_dict['sim']:
-            if sub_dict['Bandit']['ArmList'][0][0] == 'Linear':
-                mean_list = [np.inner(arm[1], sub_dict['Bandit']['MeanVector'])
-                    for arm in sub_dict['Bandit']['ArmList']]
+        for sim_dict in self.core_dict['sim']:
+            if sim_dict['Bandit']['ArmList'][0][0] == 'Linear':
+                mean_list = [np.inner(arm[1], sim_dict['Bandit']['MeanVector'])
+                    for arm in sim_dict['Bandit']['ArmList']]
             else:
-                mean_list = [arm[1] for arm in sub_dict['Bandit']['ArmList']]
+                mean_list = [arm[1] for arm in sim_dict['Bandit']['ArmList']]
             self.core_dict['bins'].append(np.amax(
-                mean_list - np.amin(mean_list)) * sub_dict['horizon'])
+                mean_list - np.amin(mean_list)) * sim_dict['horizon'])
         return None
 
 

@@ -7,6 +7,8 @@ import numpy as np
 from numpy.linalg import inv
 
 __all__ = ['StoBandit', 'LinBandit', 'Algorithm']
+
+
 class StoBandit:
 
     """
@@ -14,7 +16,7 @@ class StoBandit:
 
     Positional Arguments:
         * arm object
-    Properties:
+    Attributes:
         * Bandit.arms : list of arms objects within the bandit, which contains:
             * Bandit.arms[n].mean : the mean of the n^th arm
             * Bandit.arms[n].info : info about the n_th arm
@@ -123,7 +125,7 @@ class LinBandit:
         * vector mean
     Keyword Arguments:
         * normalized: boolean
-    Properties:
+    Attributes:
         * normalized: boolean for normalized (all vectors length 1)
         * mean: the vector mean
         * n_arms: the number of arms
@@ -218,15 +220,21 @@ class Algorithm:
     """
     The Algorithm class specifies the behaviour of an algorithm.
 
-    As an argument, it is passed a dictionary containing an 'algtype' key along
-    with other keys.
-
-    The Algorithm.giveArm() chooses an arm based on the internal state of the
-    bandit or other factors. For a list of the supported algorithms and more
-    detailed information, see the algorithm_types module.
+    Positional Arguments:
+        * list of arm objects
+        * vector mean
+    Keyword Arguments:
+        * algtype: the algorithm function you want to use
+        * kwargs: other necessary objects depending on the algorithm
+    Attributes:
+        * var_dict: stores kwargs passed
+    Methods:
+        * giveArm(arm): provides the 'best' arm based on the algorithm
+    Caveats:
+        * you must pass it a bandit object
     """
     def __init__(self, **variables):
         self.var_dict = variables
 
     def giveArm(self):
-        return(self.var_dict['algtype'](self.bandit, self.var_dict))
+        return self.var_dict['algtype'](self.bandit, self.var_dict)

@@ -1,17 +1,36 @@
+"""
+Contains a large number of algorithms and index types relevant to certain algorithms. All algorithms
+have the following syntax:
+
+Positional Arguments:
+    * bandit instance
+    * variable dictionary
+Returns:
+    * index of chosen arm
+
+There are also indices, denoted b{1...9}, to be used with certain algorithms.
+"""
+
 import numpy as np
 from numpy.linalg import inv
 
+__all__ = [
+    'random', 'greedy', 'greedy_ep',
+    'UCB', 'UCB_KL', 'Bayes_Gauss',
+    'TS_Beta', 'TS_Gauss',
+    'UCB_Lin', 'TS_Lin',
+    'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9'
+]
 
 def random(bandit, var_dict):
     """
     Choose arms randomly.
 
-    Arm type support:
-        * Bernoulli
-        * Normal
-
-    Visualization support:
-        *
+    Positional Arguments:
+        * bandit instance
+        * variable dictionary
+    Returns:
+        * index of chosen arm
     """
     return np.random.randint(bandit.n_arms)
 
@@ -20,12 +39,11 @@ def greedy(bandit, var_dict):
     """
     Choose arms greedily.
 
-    Arm type support:
-        * Bernoulli
-        * Normal
-
-    Visualization support:
-        *
+    Positional Arguments:
+        * bandit instance
+        * variable dictionary
+    Returns:
+        * index of chosen arm
     """
     return np.argmax(bandit.U)
 
@@ -34,12 +52,11 @@ def greedy_ep(bandit, var_dict):
     """
     Random with probability epsilon, else greedy.
 
-    Arm type support:
-        * Bernoulli
-        * Normal
-
-    Visualization support:
-        *
+    Positional Arguments:
+        * bandit instance
+        * variable dictionary
+    Returns:
+        * index of chosen arm
     """
     if np.random.random() < var_dict['epsilon']:
         random(bandit, var_dict)
@@ -52,12 +69,11 @@ def UCB(bandit, var_dict):
     """
     Upper Confidence Bound algorithm.
 
-    Arm type support:
-        * Bernoulli
-        * Normal
-
-    Visualization support:
-        * ConfAnimation
+    Positional Arguments:
+        * bandit instance
+        * variable dictionary
+    Returns:
+        * index of chosen arm
     """
     index_type = var_dict['incr']
     alpha = var_dict['alpha']
@@ -72,11 +88,11 @@ def UCB_KL(bandit, var_dict):
     """
     KL Upper Confidence Bound algorithm.
 
-    Arm type support:
-        * Bernoulli
-
-    Visualization support:
-        * ConfAnimation
+    Positional Arguments:
+        * bandit instance
+        * variable dictionary
+    Returns:
+        * index of chosen arm
     """
 
     # TODO find a way to vectorize this...
@@ -122,12 +138,11 @@ def Bayes_Gauss(bandit, var_dict):
 
     Note: for precision reasons, only accurate to a horizon of 5000!
 
-    Arm type support:
-        * Bernoulli
-        * Normal
-
-    Visualization support:
-        * DistAnimation  # TODO - no support yet!
+    Positional Arguments:
+        * bandit instance
+        * variable dictionary
+    Returns:
+        * index of chosen arm
     """
     def npdf(x, mu, sigma):
         return 0.39894228 / sigma * 0.60653066**(((x-mu)/(sigma))**2)
@@ -158,11 +173,11 @@ def TS_Beta(bandit, var_dict):
     """
     Beta Thompson Sampling algorithm
 
-    Arm type support:
-        * Bernoulli
-
-    Visualization support:
-        * DistAnimation  # TODO - no support yet!
+    Positional Arguments:
+        * bandit instance
+        * variable dictionary
+    Returns:
+        * index of chosen arm
     """
     return np.argmax(np.random.beta(bandit.arm_reward + 1, bandit.T - bandit.arm_reward + 1))
 
@@ -170,11 +185,11 @@ def TS_Gauss(bandit, var_dict):
     """
     Gaussian Thompson Sampling algorithm
 
-    Arm type support:
-        * Normal
-
-    Visualization support:
-        * DistAnimation  # TODO - no support yet!
+    Positional Arguments:
+        * bandit instance
+        * variable dictionary
+    Returns:
+        * index of chosen arm
     """
     mask = bandit.T == 0
     bandit.U_conf[mask] += 100000
@@ -188,11 +203,11 @@ def UCB_Lin(bandit, var_dict):
     """
     Finite Linear Upper Confidence Bound algorithm
 
-    Arm type support:
-        * Linear
-
-    Visualization support:
-        * EllipseAnimation
+    Positional Arguments:
+        * bandit instance
+        * variable dictionary
+    Returns:
+        * index of chosen arm
     """
     rho = bandit.dim * np.log(bandit.timestep[0])
     bandit.U_conf = (np.inner(bandit.arm_vecs, bandit.U)
@@ -206,6 +221,12 @@ def TS_Lin(bandit, var_dict):
     """
     Does Thompson Sampling from the multivariate distribution with mean
     bandit.U and covariance inv(bandit.G)
+
+    Positional Arguments:
+        * bandit instance
+        * variable dictionary
+    Returns:
+        * index of chosen arm
     """
     bandit.U_conf = np.einsum('ij,ij->i',
         np.random.multivariate_normal(

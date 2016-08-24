@@ -4,6 +4,7 @@ from .algorithms import *
 from .arms import *
 from .core import *
 
+import numpy as np
 from pprint import pprint
 
 
@@ -35,7 +36,7 @@ class Simulation:
         self.alg.bandit = bandit_inst
         self.total_regret = 0
         self.iterations = 0
-        self.arm_info = [each_arm.info for each_arm in self.bandit.arms]
+        self.arm_info = [each_arm.info() for each_arm in self.bandit.arms]
 
 
     def reset(self):

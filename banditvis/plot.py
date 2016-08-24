@@ -27,7 +27,7 @@ def VarPlot(core_dict):
     fig, ax = mpl_defaults.plot()
 
     # add plots
-    for i, sub_dict in enumerate(core_dict['sim']):
+    for i, sim_dict in enumerate(core_dict['sim']):
         y_list = np.loadtxt(
             "{}/data{}.txt".format(core_dict['DataFolder'], i),
             float)
@@ -38,7 +38,7 @@ def VarPlot(core_dict):
         plt.plot(x_list, y_list,".--",
             linewidth=1,
             color = cmap(0.8),
-            label = sub_dict['label'])
+            label = sim_dict['label'])
 
     # labels / text
     legend = plt.legend(loc='best', framealpha = 1.0)
@@ -75,7 +75,7 @@ def HistPlot(core_dict):
     bins = np.linspace(0, np.amax(core_dict['bins']), num = 90)
 
     # add plots
-    for i, sub_dict in enumerate(core_dict['sim']):
+    for i, sim_dict in enumerate(core_dict['sim']):
         data = np.loadtxt(
             "{}/data{}.txt".format(core_dict['DataFolder'], i),
             float)
@@ -89,7 +89,7 @@ def HistPlot(core_dict):
             normed=1,
             alpha=0.6,
             facecolor = cmap(0.8),
-            label = sub_dict['label'])
+            label = sim_dict['label'])
 
     # labels / text
     legend = plt.legend(loc='best', framealpha = 1.0)

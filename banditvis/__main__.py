@@ -43,11 +43,11 @@ def get_args():
     if ("-h" or "--help") in sys.argv[1:]:
         print(get_usage())
         sys.exit(0)
-    elif "-V" or "--version" in sys.argv[1:]:
+    elif ("-V" or "--version") in sys.argv[1:]:
         print("banditvis ({}) -- installed at {}".format(__version__, "/".join(__file__.split("/")[:-1])))
         sys.exit(0)
     else:
-        return args
+        return vars(parser.parse_args())
 
 def main():
     run(**get_args())

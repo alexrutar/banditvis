@@ -18,7 +18,6 @@ def HistAnimation(core_dict):
     TODO
     * fix bins
     * custom user labels
-    * add support for custom fps
     """
 
     # defaults

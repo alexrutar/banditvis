@@ -386,8 +386,8 @@ The critical importance of core_dict
         this makes process management trivial; very few checks are needed (only using join() to make sure data is done before making a plot, etc)
     all communication between DataGen and Plot functions is done by reading and writing to text files; this is described in more detail under Data generation / saving procedure
 
-sub_dict notation:  // explain notation used in general
-    *sub_dict* is some sub dictionary of *core_dict*
+sim_dict notation:  // explain notation used in general
+    *sim_dict* is some sub dictionary of *core_dict*
 
 Processes, opening subprocesses, mac limitations, etc.
     all graphical processes must be in main
