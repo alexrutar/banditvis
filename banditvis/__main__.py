@@ -8,15 +8,15 @@ Usage:
     banditvis -V | --version
 
 
-positional arguments:
-  input                     The path to your .txt input file.
+Positional:
+  input                 The path to your .txt input file.
 
-optional arguments:
-  -D, --delete              Delete intermediate data files.
-  --data=<directory>        The path to the data directory, defaults to the
-                              current directory.
-  --out=<directory>         The path to the output location, defaults to the
-                              current directory.
+Optional:
+  -D, --delete          Delete intermediate data files.
+  --data=<directory>    The path to the data directory, defaults to the
+                          current directory.
+  --out=<directory>     The path to the output location, defaults to the
+                          current directory.
 """
 from . import __version__
 from .manager import run
@@ -44,10 +44,10 @@ def get_args():
         print(get_usage())
         sys.exit(0)
     elif "-V" or "--version" in sys.argv[1:]:
-        print("banditvis ({}) -- installed at {}\n".format(__version__, "/".join(__file__.split("/")[:-1])))
+        print("banditvis ({}) -- installed at {}".format(__version__, "/".join(__file__.split("/")[:-1])))
         sys.exit(0)
     else:
-        return vars(parser.parse_args())
+        return args
 
 def main():
     run(**get_args())
