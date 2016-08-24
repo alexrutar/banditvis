@@ -1,3 +1,6 @@
+"""
+The manager module for the command line tools. It does multiprocess management, as well as
+"""
 import multiprocessing as mp
 import threading as th
 from pprint import pprint
@@ -36,21 +39,22 @@ class _statusThread(th.Thread):
     def __init__(self, core_dict):
         super(_statusThread, self).__init__()
         self.core_dict = core_dict
-        self.n_files = len(core_dict['sim'])
         self.daemon = True
-        self.total = core_dict['total_lines']
-        self.processes = core_dict['Multiprocess']
     def run(self):
-        while True:  # TODO fix this to have a termination
+        current = [0] * self.n_files
+        finished = 0
+        total = self.core_dict['total_lines']
+        n_files = len(core_dict['sim'])
+        while finished != total:  # TODO fix this to have a termination
             time.sleep(0.5)
-            current = [0] * self.n_files
-            try:
-                for i in range(self.n_files):
+            for i in range(n_files):
+                try:
                     with open("{}/data{}.txt".format(self.core_dict['DataFolder'], i), 'r') as file:
-                        current[i] += sum(1 for line in file) - 1
-            except FileNotFoundError:
-                pass
-            sys.stdout.write("\r" + " {:2.0f} % complete ".format(sum(current)*100/self.total).center(100, "-"))
+                        current[i] = sum(1 for line in file) - 1
+                except FileNotFoundError:
+                    pass
+            finished = sum(current)
+            sys.stdout.write("\r" + " {:2.0f} % complete ".format(finished*100/total).center(100, "-"))
             sys.stdout.flush()
 
 
