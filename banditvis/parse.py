@@ -57,8 +57,17 @@ def Parse(user_file, **arg_dict):
     else:
         print(bcolors.OKGREEN + "\n" + "No Errors!".center(100, "-") + "\n" + bcolors.ENDC)
 
-    # post processing
-    core_dict.post()
+    warnings = core_dict.warnings()
+    if warnings:
+        print(bcolors.WARN
+            + "\n+" + " WARNING LIST ".center(100, "-") + "+\n" + bcolors.ENDC
+            + "".join(["- {}\n".format(item) for item in warnings]))
+        user_response = input("Press Enter to continue, and <any key> + Enter to abort. - ")
+        if user_response:
+            sys.exit(0)
+
+    else:
+        print(bcolors.OKGREEN + "\n" + " No Warnings! ".center(100, "-") + "\n" + bcolors.ENDC)
 
     # done!
     return core_dict
@@ -72,10 +81,12 @@ def DictCheck(core_dict):
     other specifics. The full list of checking functions with explanations
     can be found in the _check class.
     """
-    check = _check(core_dict)
+    check = Check(core_dict)
     if core_dict['InputData']:
         check.SimExist('label')
         check.Save()
+        check.Title()
+
 
     elif core_dict['init'] == 'Variable':
         check.Save()
@@ -85,6 +96,10 @@ def DictCheck(core_dict):
         check.SimExist('label')
 
         check.Args()
+        check.Linecount()
+        check.Folder()
+        check.Title()
+
 
     elif core_dict['init'] == 'Histogram':
         check.Save()
@@ -94,8 +109,14 @@ def DictCheck(core_dict):
         check.SimExist('label')
 
         check.Bins()
+        check.Linecount()
+        check.Folder()
+        check.Title()
+
+
     elif core_dict['init'] == 'Visualize':
         pass
+
 
     else:
         sys.exit(bcolors.FAIL
@@ -120,7 +141,7 @@ class CoreDict(dict):
         try:
             default_txt = yaml.load(open("/".join(__file__.split('/')[:-1]) + "/defaults.py", 'r'))
         except FileNotFoundError:
-            sys.exit("Could not find defaults file at: " + "/".join(__file__.split('/')[:-1]) + "/defaults.py")
+            raise FileNotFoundError("Could not find defaults file at: " + "/".join(__file__.split('/')[:-1]) + "/defaults.py")
         self.default = {**default_txt, **arg_dict}  # add the arg_dict arguments to overwrite any defaults
         self.ignore = {'InputData', 'DataFolder', 'Animate'}
         self.warning_list = []
@@ -128,85 +149,69 @@ class CoreDict(dict):
     def __missing__(self, key):
         try:
             if key not in self.ignore:
-                self.warning_list += ["'{} missing, defaulting to '{}'".format(
+                self.warning_list += ["{} missing, defaulting to '{}'".format(
                     key,
                     self.default[key])]
             return self.default[key]
         except KeyError:
-            raise KeyError("CoreDict: '{}' key missing in both the dict and the default dict."
-                .format(key))
-
-    def post(self):
-        """
-        Additional changes to be done after checking
-        """
-        self.default.setdefault('DataFolder', "{}".format(
-            datetime.strftime(datetime.now(), '%Y-%m-%d %H_%M_%S')))
-        try:
-            if self.default['data']:
-                self.default['DataFolder'] = self.default['data'] + "/" + self.default['DataFolder']
-            if self.default['out']:
-                self['PlotSave'] = self.default['out'] + "/" + self['PlotSave']
-                self.default['PlotSave'] = self.default['out'] + "/" + self.default['PlotSave']
-        except KeyError:
-            pass
-        if self['init'] == 'Histogram':
-            self['total_lines'] = sum(sim_dict['cycles'] for sim_dict in self['sim'])
-
-        elif self['init'] == 'Variable':
-            self['total_lines'] = len(self['arg_list']) * len(self['sim'])
-
-        if not self['PlotTitle']:
-            # self['PlotTitle'] = self['PlotSave'].split("/")[-1].split(".")[0] + "\n"
-            self['PlotTitle'] = msplit(self['PlotSave'], "/", ".")[-1] + "\n"
-        else:
-            self['PlotTitle'] += "\n"
-
-
-        return None
-
+            raise KeyError("CoreDict '{}' key missing in both the dict and the default dict.".format(key))
 
     def warnings(self):
-        if not self.warning_list:
-            return (bcolors.OKGREEN + "\n" + " No Warnings! ".center(100, "-") + "\n" + bcolors.ENDC)
-        else:
-            # removes repeats from the warning list
-            return (bcolors.WARN
-                + "\n+" + " WARNING LIST ".center(100, "-") + "+\n" + bcolors.ENDC
-                + "".join(["- {}\n".format(item) for item in list(set(self.warning_list))]))
-    def state(self):
-        print(bcolors.OKBLUE + "\n" + " Completed Core Dict ".center(100, "-") + "\n" + bcolors.ENDC)
-        pprint(self)
-        print(bcolors.OKBLUE + "\n" + " Default Dict ".center(100, "-") + "\n" + bcolors.ENDC)
-        pprint(self.default)
-        print(bcolors.OKBLUE + "\n" + " End State ".center(100, "-") + "\n" + bcolors.ENDC)
+        return [item for item in list(set(self.warning_list))]
 
+    def state(self):
+        print("\n" + " Completed Core Dict ".center(100, "-") + "\n")
+        pprint(self)
+        print("\n" + " Default Dict ".center(100, "-") + "\n")
+        pprint(self.default)
+        print("\n" + " End State ".center(100, "-") + "\n")
         return None
 
-class _check:
+
+class Check:
     """
     A class which checks a dictionary for errors. It contains a large number of
-    methods which are convenient / reusable when parsing dictionary objects.
+    methods which are convenient / reusable when parsing dictionary objects, and also custom methods
+    to do variable formatting.
 
+    Positional Arguments:
+        * core_dict: a core_dict or dict-like object
+    Attributes:
+        * core_dict: the core_dict
+        * errors: a list of errors
+    Methods:
+        * give(): returns the core_dict and a formatted of error string
+        * Visual(name): (Currently doesn't do anything)
+        * Conflict(name): checks for conflict / multiple declarations of 'name'
+        * Exist(name): checks if name exists in the dict
+        * SimExist(name): checks if name exists in every simulation sub dictionary
+        * Save(): checks for the save title, as well as the save output folder
+        * Bins(): figure out appropriate bin allocation for histogram plots
+        * Args(): check the args for consistency / proper declaration
+        * Folder(): creates a data_folder name and prepends the path to it
+        * Linecount(): determines how many lines will be printed to data files
+        * Title(): creates a title if none exists and formats an existing one
     """
 
     def __init__(self, core_dict):
         self.core_dict = core_dict
         self.errors = []
 
+
     def give(self):
         return (self.core_dict, "\n".join(set(self.errors)))  # removes repeats from self.errors
+
 
     def Visual(self, name):
         if core_dict['visual'] == 'confidence':
             pass
-
         elif core_dict['visual'] == 'ellipse':
             pass
         elif core_dict['visual'] == 'distribution':
             pass
         else:
             pass
+
 
     def Conflict(self, name):
         """
@@ -250,6 +255,7 @@ class _check:
                 del self.core_dict['{}'.format(name)]
         return None
 
+
     def Exist(self, name):
         """
         Checks if 'name' exists in the core_dict
@@ -286,6 +292,9 @@ class _check:
             and not self.core_dict['PlotSave'].endswith(".png")):
             self.errors += ["- PlotSave: You can only save a plot as a '.pdf' or '.png'. PDF is "
                 "the recommended file type for image quality."]
+        if self.core_dict.default['out']:
+            self.core_dict['PlotSave'] = self.core_dict.default['out'] + "/" + self.core_dict['PlotSave']
+            self.core_dict.default['PlotSave'] = self.core_dict.default['out'] + "/" + self.core_dict.default['PlotSave']
         return None
 
 
@@ -332,4 +341,32 @@ class _check:
                     self.core_dict['Var']['samples'])
             except KeyError:
                 pass
+        return None
+
+
+    def Folder(self):
+        """
+        Additional changes to be done after checking
+        """
+        self.core_dict.default.setdefault('DataFolder', "{}".format(
+            datetime.strftime(datetime.now(), '%Y-%m-%d %H_%M_%S')))
+        if self.core_dict.default['data']:
+            self.core_dict.default['DataFolder'] = self.core_dict.default['data'] + "/" + self.core_dict.default['DataFolder']
+        return None
+
+
+    def Linecount(self):
+        if self.core_dict['init'] == 'Histogram':
+            self.core_dict['total_lines'] = sum(sim_dict['cycles'] for sim_dict in self.core_dict['sim'])
+        elif self.core_dict['init'] == 'Variable':
+            self.core_dict['total_lines'] = len(self.core_dict['arg_list']) * len(self.core_dict['sim'])
+        return None
+
+
+    def Title(self):
+        if not self.core_dict['PlotTitle']:
+            self.core_dict['PlotTitle'] = msplit(self.core_dict['PlotSave'], "/", ".")[-1] + "\n"
+        else:
+            self.core_dict['PlotTitle'] += "\n"
+
         return None

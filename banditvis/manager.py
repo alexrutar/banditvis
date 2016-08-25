@@ -61,7 +61,9 @@ def run(**arg_dict):
     core_dict = _checkInput(**arg_dict)
     pool = mp.Pool(core_dict['Multiprocess'], _init_worker)
     # ----------------------------------------------------------------------------------------------
-    core_dict.state()  # displays the core_dict
+    # print(bcolors.OKBLUE)
+    # core_dict.state()  # displays the core_dict
+    # print(bcolors.ENDC)
 
     try:
         if core_dict['init'] == 'Histogram':
