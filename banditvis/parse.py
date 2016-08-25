@@ -9,7 +9,7 @@ from pprint import pprint
 
 from .helper import msplit
 from .formatting import bcolors
-
+from .defaults import USER_DEFAULTS, CORE_DEFAULTS
 
 def Parse(user_file, **arg_dict):
     """
@@ -138,11 +138,9 @@ class CoreDict(dict):
         for k, v in list(arg_dict.items()):  # removes unspecified arguments
             if v == None:
                 del(arg_dict[k])
-        try:
-            default_txt = yaml.load(open("/".join(__file__.split('/')[:-1]) + "/defaults.py", 'r'))
-        except FileNotFoundError:
-            raise FileNotFoundError("Could not find defaults file at: " + "/".join(__file__.split('/')[:-1]) + "/defaults.py")
-        self.default = {**default_txt, **arg_dict}  # add the arg_dict arguments to overwrite any defaults
+
+        # if there is conflict, right dictionary has higher precedence
+        self.default = {**CORE_DEFAULTS, **USER_DEFAULTS, **arg_dict}
         self.ignore = {'InputData', 'DataFolder', 'Animate'}
         self.warning_list = []
 
