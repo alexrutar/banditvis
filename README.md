@@ -1,3 +1,6 @@
+*In Progress, still making constant major changes to master branch*
+*Not really usable right now*
+
 # Intro
 
 This Bandit Visualization module provides an easy-to-use library for implementing and visualizing various Bandit algorithms and environments in machine learning. If you are looking for the following, this library is not for you:
