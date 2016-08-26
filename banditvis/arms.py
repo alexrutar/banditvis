@@ -8,7 +8,7 @@ Methods:
 
 import numpy as np
 
-__all__ = ['BernoulliArm', 'NormalArm', 'LinearArm']
+__all__ = ['BernoulliArm', 'NormalArm', 'LinearArm', 'GeneralArm']
 
 class BernoulliArm:
     """
@@ -118,3 +118,15 @@ class LinearArm:
 
     def pull(self):
         return np.inner(self.arm_vec, self.mean_vec) + np.random.normal(0,1)
+
+class GeneralArm:
+    def __init__(self, reward_vec):
+        self.reward_vec = reward_vec
+        self.mean = np.average(reward_vec)
+
+    def info(self):
+        return["General", self.mean]
+
+    def pull(self, timestep):
+        # fixes indexing
+        return self.reward_vec[timestep-1]

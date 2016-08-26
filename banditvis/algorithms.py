@@ -245,7 +245,7 @@ def exp(bandit, var_dict):
     # then draw from it
     arm_chosen = np.argmax(np.random.multinomial(1, p_dist))
     # update the weights
-    bandit.W[arm_chosen] *= np.exp(-nu * bandit.loss_seq[arm_chosen][bandit.timestep[0]-1]/p_dist[arm_chosen])
+    bandit.W[arm_chosen] *= np.exp(-nu * bandit.seq[arm_chosen][bandit.timestep[0]-1]/p_dist[arm_chosen])
     return arm_chosen
 
 def B1(bandit):
