@@ -189,6 +189,7 @@ class LinBandit:
         self.timestep = np.zeros(self.n_arms, dtype=np.int)
         return None
 
+
     def fullInfo(self):
         print("\n" + "+" + "-"*105 + "+")
         print("| Mean Vector: {}\n|".format(self.mean))
@@ -214,21 +215,59 @@ class LinBandit:
 class AdvBandit:
     def __init__(self, reward_seq, is_file=False):
         if is_file:
-            self.reward_seq = np.loadtxt(reward_seq)
+            self.loss_seq = np.loadtxt(reward_seq)
         else:
-            self.reward_seq = reward_seq
-        self.n_arms, self.horizon = reward_seq.shape  # dimensions of the input array
-        self.w = np.ones(self.n_arms)
+            self.loss_seq = reward_seq
+        self.loss_seq = np.ones(self.loss_seq.shape) - self.loss_seq
+
+        self.n_arms, self.horizon = self.loss_seq.shape  # dimensions of the input array
+        self.horizon = [self.horizon] * self.n_arms
+        self.U = np.ones(self.n_arms)
+        self.W = np.ones(self.n_arms)  # weights, updated by algorithm
         self.T = np.zeros(self.n_arms)
+        self.pulled = np.full(self.loss_seq.shape, False, dtype=bool)
         self.timestep = np.zeros(self.n_arms, dtype=np.int)
-        self.l_tilde = np.zeros(self.n_arms, dtype=np.int)
+        self.loss_approx = np.zeros(self.n_arms, dtype=np.int)
 
 
     def pullArm(self, arm):
         self.T[arm] += 1
         self.timestep += 1
-        self.w[arm]
+        self.pulled[arm][self.timestep-1] = True
 
+    def giveRegret(self):
+        values = self.pulled * self.loss_seq
+        total_loss = np.sum(values)
+        # the slice shortens the row by truncating any columns beyond the timestep
+        best_arm_loss = np.amin(np.sum(self.loss_seq[:,:self.timestep[0]], axis=1))  # compute the best arm loss
+        return total_loss - best_arm_loss
+
+
+    def reset(self):
+        self.W = np.ones(self.n_arms)  # weights, updated by algorithm
+        self.T = np.zeros(self.n_arms)
+        self.pulled = np.full(self.loss_seq.shape, False, dtype=bool)
+        self.timestep = np.zeros(self.n_arms, dtype=np.int)
+        self.loss_approx = np.zeros(self.n_arms, dtype=np.int)
+
+    def fullInfo(self):
+        print("\n" + "+" + "-"*85 + "+")
+
+        for arm in range(self.n_arms):
+            print(arm)
+            print("| Arm {0}: weight ({1:f}), called ({2}) times".format(
+                arm,
+                self.W[arm],
+                self.T[arm]))
+        print("|\n| {0} arms, regret ({1}), timestep ({2} / {3})"
+            .format(
+                self.n_arms,
+                self.giveRegret(),
+                self.timestep[0],
+                self.horizon[0]))
+
+        print("+" + "-"*85 + "+" + "\n")
+        return None
 class Algorithm:
     """
     The Algorithm class specifies the behaviour of an algorithm.

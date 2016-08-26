@@ -133,11 +133,8 @@ class CoreDict(dict):
     """
     def __init__(self, in_dict, core_defaults=CORE_DEFAULTS, user_defaults=USER_DEFAULTS, **arg_dict):
         dict.__init__(self, in_dict)
-        for k, v in list(arg_dict.items()):  # removes unspecified arguments
-            if v == None:
-                del(arg_dict[k])
 
-        # if there is conflict, right dictionary has higher precedence
+        # precedence: arg_dict, then user_defaults, then core_defaults
         self.default = {**core_defaults, **user_defaults, **arg_dict}
         self.ignore = {'InputData', 'DataFolder', 'Animate'}
         self.warning_list = []
@@ -147,7 +144,8 @@ class CoreDict(dict):
             if key not in self.ignore:
                 self.warning_list += ["{} missing, defaulting to '{}'".format(
                     key,
-                    self.default[key])]
+                    self.default[key])
+                ]
             return self.default[key]
         except KeyError:
             raise KeyError("CoreDict '{}' key missing in both the dict and the default dict.".format(key))
