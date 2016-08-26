@@ -19,6 +19,7 @@ __all__ = [
     'UCB', 'UCB_KL', 'Bayes_Gauss',
     'TS_Beta', 'TS_Gauss',
     'UCB_Lin', 'TS_Lin',
+    'exp',
     'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9'
 ]
 
@@ -236,6 +237,16 @@ def TS_Lin(bandit, var_dict):
         bandit.arm_vecs)
 
     return np.argmax(bandit.U_conf)
+
+def exp(bandit, var_dict):
+    # first make the probability distribution
+    nu = var_dict['nu']
+    p_dist = bandit.W/np.sum(bandit.W)
+    # then draw from it
+    arm_chosen = np.argmax(np.random.multinomial(1, p_dist))
+    # update the weights
+    bandit.W[arm_chosen] *= np.exp(-nu * bandit.loss_seq[arm_chosen][bandit.timestep[0]-1]/p_dist[arm_chosen])
+    return arm_chosen
 
 def B1(bandit):
     return bandit.timestep
