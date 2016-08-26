@@ -6,7 +6,7 @@ class.
 import numpy as np
 from numpy.linalg import inv
 
-__all__ = ['StoBandit', 'LinBandit', 'Algorithm']
+__all__ = ['StoBandit', 'LinBandit', 'AdvBandit', 'Algorithm']
 
 
 class StoBandit:
@@ -47,31 +47,19 @@ class StoBandit:
         self.U = np.zeros(self.n_arms)
         self.U_conf = np.zeros(self.n_arms)
         self.timestep = np.zeros(self.n_arms, dtype=np.int)
-        self.total_reward = 0
-        self.arm_reward = np.zeros(self.n_arms, dtype=np.int)
 
         self.mean_list = np.array([self.arms[arm].mean
             for arm in range(self.n_arms)])
 
 
     def giveRegret(self):
-        self.regret = 0
-        for arm in range(self.n_arms):
-            self.regret += self.T[arm] * (np.amax(self.mean_list) - self.arms[arm].mean)
-
-        return(self.regret)
+        return sum(self.T[i] * (np.amax(self.mean_list) - self.arms[i].mean) for i in range(self.n_arms))
 
 
     def pullArm(self, arm):
         self.T[arm] += 1
         self.timestep += 1
-
-        self.reward = self.arms[arm].pull()
-
-        self.U[arm] = self.U[arm] + 1/self.T[arm] * (self.reward - self.U[arm])
-
-        self.total_reward += self.reward
-        self.arm_reward[arm] += self.reward
+        self.U[arm] = self.U[arm] + 1/self.T[arm] * (self.arms[arm].pull() - self.U[arm])
 
         return None
 
@@ -81,8 +69,6 @@ class StoBandit:
         self.U = np.zeros(self.n_arms)
         self.U_conf = np.zeros(self.n_arms)
         self.timestep = np.zeros(self.n_arms, dtype=np.int)
-        self.total_reward = 0
-        self.arm_reward = np.zeros(self.n_arms, dtype=np.int)
         self.regret = 0
 
         return None
@@ -100,10 +86,10 @@ class StoBandit:
                     self.U[arm],
                     self.U_conf[arm],
                     self.T[arm]))
-        print("|\n| {0} arms, total reward ({1}), timestep ({2} / {3})"
+        print("|\n| {0} arms, regret ({1}), timestep ({2} / {3})"
             .format(
                 self.n_arms,
-                self.total_reward,
+                self.giveRegret(),
                 self.timestep[0],
                 self.horizon[0]))
 
@@ -147,23 +133,29 @@ class LinBandit:
         * fullInfo(): print information about the bandit
     """
     def __init__(self, arm_object_list, vector_mean, normalized=False):
-        self.normalized = normalized
         self.mean = vector_mean
+        self.arms = arm_object_list
+        self.arm_vecs = np.array([arm.arm_vec for arm in self.arms])
+        self.normalized = normalized
+
+        if self.normalized:
+            self.mean = self.mean/np.linalg.norm(self.mean)
+            self.arm_vecs = np.array([arm/np.linalg.norm(arm) for arm in self.arm_vecs])
+
         self.n_arms =  len(arm_object_list)
         self.T = np.zeros(len(arm_object_list), dtype = int)
-        self.arms = arm_object_list
         self.dim = arm_object_list[0].dim
-        self.arm_vecs = np.array([arm.arm_vec for arm in self.arms])
+
         self.G = np.identity(self.dim)  # .dim is the dimension
         self.U = np.zeros(self.dim)  # vector of averages
         self.A = np.zeros(self.dim)  # vectors of actions taken so far weighted by the reward
         self.U_conf = np.zeros(self.n_arms)
         self.timestep = np.zeros(self.n_arms, dtype=np.int)
+
+        # give each arm a vector mean
         for arm in arm_object_list:
             arm.mean_vec = vector_mean
-        if self.normalized:
-            self.mean = self.mean/np.linalg.norm(self.mean)
-            self.arm_vecs = np.array([arm/np.linalg.norm(arm) for arm in self.arm_vecs])
+
     def pullArm(self, arm):
         self.T[arm] += 1
         self.timestep += 1  # update timesetp
@@ -182,10 +174,11 @@ class LinBandit:
         return None
 
     def giveRegret(self):
-        return (np.amax(np.dot(self.arm_vecs, self.mean)) * self.timestep[0] - np.dot(
+        return np.amax(np.dot(self.arm_vecs, self.mean)) * self.timestep[0] - np.dot(
             self.T,
-            np.dot(self.arm_vecs, self.mean))
+            np.dot(self.arm_vecs, self.mean)
         )
+
 
     def reset(self):
         self.T = np.zeros(self.n_arms)
@@ -215,6 +208,26 @@ class LinBandit:
         )
         print("+" + "-"*105 + "+" + "\n")
         return None
+
+
+
+class AdvBandit:
+    def __init__(self, reward_seq, is_file=False):
+        if is_file:
+            self.reward_seq = np.loadtxt(reward_seq)
+        else:
+            self.reward_seq = reward_seq
+        self.n_arms, self.horizon = reward_seq.shape  # dimensions of the input array
+        self.w = np.ones(self.n_arms)
+        self.T = np.zeros(self.n_arms)
+        self.timestep = np.zeros(self.n_arms, dtype=np.int)
+        self.l_tilde = np.zeros(self.n_arms, dtype=np.int)
+
+
+    def pullArm(self, arm):
+        self.T[arm] += 1
+        self.timestep += 1
+        self.w[arm]
 
 class Algorithm:
     """

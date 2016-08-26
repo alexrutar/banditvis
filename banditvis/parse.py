@@ -52,7 +52,7 @@ def Parse(user_file, **arg_dict):
     # if there are errors, print them
     if errors:
         sys.exit(bcolors.FAIL
-            + "\n+" + " ERROR LIST ".center(100, "-") + "+\n" + bcolors.ENDC
+            + "\n" + " ERROR LIST ".center(100, "-") + "\n" + bcolors.ENDC
             + self.errors + "\n\n")
     else:
         print(bcolors.OKGREEN + "\n" + "No Errors!".center(100, "-") + "\n" + bcolors.ENDC)
@@ -60,9 +60,9 @@ def Parse(user_file, **arg_dict):
     warnings = core_dict.warnings()
     if warnings:
         print(bcolors.WARN
-            + "\n+" + " WARNING LIST ".center(100, "-") + "+\n" + bcolors.ENDC
+            + "\n" + " WARNING LIST ".center(100, "-") + "\n" + bcolors.ENDC
             + "".join(["- {}\n".format(item) for item in warnings]))
-        user_response = input("Press Enter to continue, and <any key> + Enter to abort. - ")
+        user_response = input("Press Enter to continue, and <any key> + Enter to abort. ")
         if user_response:
             sys.exit(0)
 
@@ -130,17 +130,15 @@ class CoreDict(dict):
     """
     Subclasses dict to change behaviour with missing key (allows setting of deafults easily) and
     some other custom methods.
-
-    TODO: read defaults from some external file, maybe with type-specific defaults
     """
-    def __init__(self, in_dict, **arg_dict):
+    def __init__(self, in_dict, core_defaults=CORE_DEFAULTS, user_defaults=USER_DEFAULTS, **arg_dict):
         dict.__init__(self, in_dict)
         for k, v in list(arg_dict.items()):  # removes unspecified arguments
             if v == None:
                 del(arg_dict[k])
 
         # if there is conflict, right dictionary has higher precedence
-        self.default = {**CORE_DEFAULTS, **USER_DEFAULTS, **arg_dict}
+        self.default = {**core_defaults, **user_defaults, **arg_dict}
         self.ignore = {'InputData', 'DataFolder', 'Animate'}
         self.warning_list = []
 
