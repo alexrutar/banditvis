@@ -8,7 +8,7 @@ Methods:
 
 import numpy as np
 
-__all__ = ['BernoulliArm', 'NormalArm', 'LinearArm', 'GeneralArm']
+__all__ = ['BernoulliArm', 'NormalArm', 'LinearArm', 'GeneralArm', 'BanditArm']
 
 class BernoulliArm:
     """
@@ -132,16 +132,15 @@ class GeneralArm:
         return self.reward_vec[timestep-1]
 
 class BanditArm:
-
-    def __init__(self, horizon):
+    def __init__(self, horizon, seed=False):
         self.horizon = horizon
-        self.seq = None
+        self.seq = np.array([])
         self.info = []
+        if seed:
+            np.random.seed(seed)
     def give(self):
-        if self.seq:
-            return self.seq, self.info
-        else:
-            raise AttributeError("BanditArm: there are no defined arms")
+        return self.seq, self.info
+
 
     def add(self, arm_type, **kwargs):
         """
@@ -180,7 +179,7 @@ class BanditArm:
             raise AttributeError('BanditArm: {} armtype not recognized'.format(arm_type))
 
     def _add(self, new_vec):
-        if self.seq:
+        if self.seq.size:
             self.seq = np.vstack((self.seq, new_vec))
         else:
             self.seq = new_vec
@@ -200,27 +199,31 @@ class BanditArm:
         # define custom properties with additional kwargs, overwrites any existion definitions
         # use this to give your stuff nicer names, etc
         new_vec = np.loadtxt(input_)
-        try:
-            x,y = new_vec.shape
-            raise AttributeError('BanditArm: input must be 1 dimensional')
-        except ValueError:
+        if len(new_vec.shape) == 1:
             x, = new_vec.shape
-        try:
             if x == self.horizon:
                 self._add(new_vec)
                 self.info.append({**{'armtype': 'Custom', 'source': input_, 'mean': np.mean(new_vec)}, **properties})
             else:
-                raise ValueError
-        except ValueError:
-            raise ValueError("BanditArm: improper input shape")
+                raise ValueError("BanditArm: array inconsistent with horizon")
+        elif len(new_vec.shape) == 2:
+            for row in new_vec:
+                x, = row.shape
+                if x == self.horizon:
+                    self._add(row)
+                    self.info.append({**{'armtype': 'Custom', 'source': input_, 'mean': np.mean(row)}, **properties})
+                else:
+                    raise ValueError("BanditArm: array inconsistent with horizon")
+        else:
+            raise ValueError("BanditArm: unrecognized input_ shape")
         return None
 
     def _addLinear(self, arm_v=None, mean_v=None, dist=None, noise=None, mean=0, variance=1):
         # support for vector noise coming later
-        if dist='Normal':
+        if dist == 'Normal':
             self._addLinearNormal(arm_v, mean_v, noise, mean, variance)
 
-        elif dist='Bernoulli':
+        elif dist == 'Bernoulli':
             self._addLinearBernoulli(arm_v, mean_v, noise, mean, variance)
         return None
 
