@@ -5,7 +5,7 @@ def readme():
 
 setup(
     name='banditvis',
-    version='0.2',
+    version='0.3',
     description='A library for simulating and visualizing bandit algorithms.',
     long_description=readme(),
     url='https://github.com/alexrutar/banditvis',
