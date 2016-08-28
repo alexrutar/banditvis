@@ -5,7 +5,7 @@ def readme():
 
 setup(
     name='banditvis',
-    version='0.3',
+    version='0.4',
     description='A library for simulating and visualizing bandit algorithms.',
     long_description=readme(),
     url='https://github.com/alexrutar/banditvis',
@@ -18,13 +18,15 @@ setup(
     ],
     keywords='bandit machine learning',
     license='MIT',
-    packages=find_packages(),
+    packages=find_packages(exclude=['docs', 'tests']),
     install_requres=[
         'numpy',
         'pyyaml',
         'scipy',
         'matplotlib'
     ],
+    package_data={'': ['LICENSE', 'README.md', 'user_defaults.pkl']},
+    include_package_data=True,
     entry_points={'console_scripts': ['banditvis = banditvis.__main__:main']},
     zip_safe=False
 )

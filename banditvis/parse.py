@@ -9,7 +9,7 @@ from pprint import pprint
 
 from .helper import msplit
 from .formatting import bcolors
-from .defaults import USER_DEFAULTS, CORE_DEFAULTS
+from .defaults import load_user, CORE_DEFAULTS
 
 def Parse(user_file, **arg_dict):
     """
@@ -131,7 +131,7 @@ class CoreDict(dict):
     Subclasses dict to change behaviour with missing key (allows setting of deafults easily) and
     some other custom methods.
     """
-    def __init__(self, in_dict, core_defaults=CORE_DEFAULTS, user_defaults=USER_DEFAULTS, **arg_dict):
+    def __init__(self, in_dict, core_defaults=CORE_DEFAULTS, user_defaults=load_user(), **arg_dict):
         dict.__init__(self, in_dict)
 
         # precedence: arg_dict, then user_defaults, then core_defaults

@@ -1,3 +1,6 @@
+import pickle
+import os
+
 
 CORE_DEFAULTS = {
     'out': "hi",
@@ -14,7 +17,7 @@ CORE_DEFAULTS = {
     'DeleteData': False
 }
 
-USER_DEFAULTS = {
-    'out': 'Output',
-    'data': 'Data'
-}
+def load_user():
+    with open(os.path.dirname(__file__) + '/user_defaults.pkl', 'rb') as handle:
+        _user = pickle.load(handle)
+    return _user
