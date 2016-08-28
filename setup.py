@@ -18,7 +18,7 @@ setup(
     ],
     keywords='bandit machine learning',
     license='MIT',
-    packages=find_packages(exclude=['docs', 'tests']),
+    packages=find_packages(exclude=['docs', 'tests', 'checklist.py']),
     install_requres=[
         'numpy',
         'pyyaml',
