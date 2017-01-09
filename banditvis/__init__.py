@@ -9,7 +9,7 @@ Simulate and visualize Bandit algorithms.
 
 __version__ = '0.2'
 
-from banditvis.core import StoBandit, LinBandit, Algorithm
+from banditvis.core import StoBandit, LinBandit, Algorithm, Bandit
 from banditvis.algorithms import *
-from banditvis.arms import BernoulliArm, NormalArm, LinearArm
+from banditvis.arms import BernoulliArm, NormalArm, LinearArm, BanditArm
 from banditvis.simulation import Simulation

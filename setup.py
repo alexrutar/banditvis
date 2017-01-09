@@ -25,7 +25,7 @@ setup(
         'scipy',
         'matplotlib'
     ],
-    package_data={'': ['LICENSE', 'README.md', 'user_defaults.pkl']},
+    package_data={'': ['LICENSE', 'README.md', 'banditvis/user_defaults.pkl']},
     include_package_data=True,
     entry_points={'console_scripts': ['banditvis = banditvis.__main__:main']},
     zip_safe=False

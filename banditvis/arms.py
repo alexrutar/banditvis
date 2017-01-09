@@ -136,13 +136,15 @@ class BanditArm:
         self.horizon = horizon
         self.seq = np.array([])
         self.info = []
+        self.distr = np.array([])
         if seed:
             np.random.seed(seed)
+
     def give(self):
-        return self.seq, self.info
+        return self.seq, self.distr
 
 
-    def add(self, arm_type, **kwargs):
+    def add(self, **info_list):
         """
         class to build bandit arms
         Positional
@@ -169,14 +171,18 @@ class BanditArm:
                 * alpha
                 * beta
         """
-        if arm_type == 'Custom':
-            self._addCustom(**kwargs)
-        elif arm_type == 'Stochastic':
-            self._addStochastic(**kwargs)
-        elif arm_type == 'Linear':
-            self._addLinear(**kwargs)
-        else:
-            raise AttributeError('BanditArm: {} armtype not recognized'.format(arm_type))
+        try:
+            if info_list['armtype'] == 'Custom':
+                self._addCustom(**info_list)
+            elif info_list['armtype'] == 'Stochastic':
+                self._addStochastic(**info_list)
+            elif info_list['armtype'] == 'Linear':
+                self._addLinear(**info_list)
+            else:
+                raise AttributeError('BanditArm: {} armtype not recognized'.format(info_list['armtype']))
+        except KeyError:
+            raise KeyError("You must include an 'armtype' as an argument for BanditArm.add")
+
 
     def _add(self, new_vec):
         if self.seq.size:
@@ -184,17 +190,25 @@ class BanditArm:
         else:
             self.seq = new_vec
 
-    def _addStochastic(self, dist=None, mean=0, variance=1, alpha=1, beta=1):
+    def _add_distr(self, distr_vec):
+        if self.distr.size:
+            self.distr = np.vstack((self.distr, distr_vec))
+        else:
+            self.distr = distr_vec
+
+    def _addStochastic(self, dist=None, mean=0, variance=1, alpha=1, beta=1, **kwargs):
         if dist == 'Bernoulli':
             self._addStochasticBernoulli(mean)
         elif dist == 'Normal':
             self._addStochasticNormal(mean, variance)
-        elif dist == 'beta':
-            self._addBeta(alpha, beta)
+        elif dist == 'Beta':
+            self._addStochasticBeta(alpha, beta)
         else:
             raise ValueError("BanditArm: improper distribution")
+        self._add_distr(np.full((1, self.horizon), mean, dtype=float))
+        return None
 
-    def _addCustom(self, input_=None, properties={}):
+    def _addCustom(self, input_=None, distr=None, properties={}, **kwargs):
         # input: array_like or file path
         # define custom properties with additional kwargs, overwrites any existion definitions
         # use this to give your stuff nicer names, etc
@@ -216,15 +230,20 @@ class BanditArm:
                     raise ValueError("BanditArm: array inconsistent with horizon")
         else:
             raise ValueError("BanditArm: unrecognized input_ shape")
+        if distr:
+            self._add_distr(distr)
+        else:
+            self._add_distr(new_vec)
         return None
 
-    def _addLinear(self, arm_v=None, mean_v=None, dist=None, noise=None, mean=0, variance=1):
+    def _addLinear(self, arm_v=None, mean_v=None, dist=None, noise=None, mean=0, variance=1, **kwargs):
         # support for vector noise coming later
         if dist == 'Normal':
             self._addLinearNormal(arm_v, mean_v, noise, mean, variance)
 
         elif dist == 'Bernoulli':
             self._addLinearBernoulli(arm_v, mean_v, noise, mean, variance)
+        self._add_distr(np.full((1, self.horizon), mean, dtype=float))
         return None
 
 
@@ -238,11 +257,10 @@ class BanditArm:
         self.info.append({'armtype': 'Stochastic Bernoulli', 'mean': mean})
         return None
 
-    def _addBeta(self, alpha, beta):
+    def _addStochasticBeta(self, alpha, beta):
         self._add(np.random.beta(alpha, beta, size=self.horizon))
         self.info.append({'armtype': 'Stochastic Beta', 'alpha': alpha, 'beta': beta})
         return None
-
 
     def _addLinearBernoulli(self, arm_v, mean_v, noise, mean, variance):
         if noise == 'scalar':
@@ -254,6 +272,7 @@ class BanditArm:
         else:
             raise AttributeError('BanditArm: {} noise not recognized'.format(noise))
         self.info.append({'armtype': 'Linear Bernoulli', 'arm_vector': arm_v, 'mean_vector': mean_v, 'noise': noise, 'mean': mean})
+        return None
 
     def _addLinearNormal(self, arm_v, mean_v, noise, mean, variance):
         if noise == 'scalar':
