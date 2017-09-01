@@ -48,6 +48,8 @@ class StoBandit:
         self.U = np.zeros(self.n_arms)
         self.U_conf = np.zeros(self.n_arms)
         self.timestep = np.zeros(self.n_arms, dtype=np.int)
+        self.arm_reward = np.zeros(self.n_arms, dtype=np.int)
+        self.total_reward = 0
 
         self.mean_list = np.array([self.arms[arm].mean
             for arm in range(self.n_arms)])
@@ -60,7 +62,9 @@ class StoBandit:
     def pullArm(self, arm):
         self.T[arm] += 1
         self.timestep += 1
-        self.U[arm] = self.U[arm] + 1/self.T[arm] * (self.arms[arm].pull() - self.U[arm])
+        self.reward = self.arms[arm].pull()
+        self.arm_reward[arm] += self.reward
+        self.U[arm] = self.U[arm] + 1/self.T[arm] * (self.reward - self.U[arm])
 
         return None
 
@@ -96,7 +100,6 @@ class StoBandit:
 
         print("+" + "-"*85 + "+" + "\n")
         return None
-
 
 
 

@@ -364,7 +364,7 @@ def EllipseAnimation(core_dict):
         # position of mean vector
         plt.plot([mean[0]],[mean[1]], "o",
             color='black',
-            label='True Mean')
+            label='Normalized Mean')
 
         # plot the ellipse and the mean; checks for LevelCurves option
         if (sim.alg.var_dict['algtype'].__name__ == "TS_Lin"
@@ -448,7 +448,6 @@ def DistAnimation(core_dict):
     # defaults
     fig, ax = mpl_defaults.ani()
 
-
     ReMapSim(core_dict['sim'][0])
 
     # simulation variables
@@ -471,7 +470,7 @@ def DistAnimation(core_dict):
 
     # the animation update function
     def _update(num, confidence):
-        nonlocal ax
+        nonlocal ax, xlims
         plt.cla()
 
         # step the bandit

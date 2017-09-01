@@ -65,7 +65,7 @@ def HistPlot(core_dict):
 
     TODO:
     * move HistData out of this function
-    * add support for custom user (x,y)labels, if so desired
+    * add support for custom user (x,y) labels, if so desired
     """
 
     # defaults
