@@ -1,5 +1,4 @@
-*In Progress, still making constant major changes to master branch*
-*Not really usable right now*
+*In Progress, still making somewhat major changes to master branch*
 
 # Intro
 
