@@ -20,10 +20,10 @@ setup(
     license='MIT',
     packages=find_packages(exclude=['docs', 'tests', 'checklist.py']),
     install_requires=[
-        'numpy',
-        'pyyaml',
-        'scipy',
-        'matplotlib'
+        'numpy>=1.10',
+        'pyyaml>=3.11',
+        'scipy>=0.18',
+        'matplotlib>=2'
     ],
     package_data={'': ['LICENSE', 'README.md', 'banditvis/user_defaults.pkl']},
     include_package_data=True,
