@@ -360,9 +360,12 @@ def EllipseAnimation(core_dict):
                 facecolor='none'))
 
         # position of mean vector
+        labelstr = 'True Mean'
+        if sim_dict['Normalized']:
+            labelstr = 'Normalized Mean'
         plt.plot([mean[0]],[mean[1]], "o",
             color='black',
-            label='Normalized Mean')
+            label=labelstr)
 
         # plot the ellipse and the mean; checks for LevelCurves option
         if (sim.alg.var_dict['algtype'].__name__ == "TS_Lin"

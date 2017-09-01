@@ -33,6 +33,7 @@ def random(bandit, var_dict):
     Returns:
         * index of chosen arm
     """
+    bandit.U_conf = bandit.U
     return np.random.randint(bandit.n_arms)
 
 
@@ -46,6 +47,7 @@ def greedy(bandit, var_dict):
     Returns:
         * index of chosen arm
     """
+    bandit.U_conf = bandit.U
     return np.argmax(bandit.U)
 
 
@@ -60,9 +62,9 @@ def greedy_ep(bandit, var_dict):
         * index of chosen arm
     """
     if np.random.random() < var_dict['epsilon']:
-        random(bandit, var_dict)
+        return random(bandit, var_dict)
     else:
-        greedy(bandit, var_dict)
+        return greedy(bandit, var_dict)
 
 
 

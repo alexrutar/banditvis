@@ -5,7 +5,7 @@ def readme():
 
 setup(
     name='banditvis',
-    version='0.4',
+    version='0.5',
     description='A library for simulating and visualizing bandit algorithms.',
     long_description=readme(),
     url='https://github.com/alexrutar/banditvis',
@@ -13,7 +13,7 @@ setup(
     author_email='arutar@uwaterloo.ca',
     classifiers=[
         'Development Status :: 3 - Alpha',
-        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'License :: OSI Approved :: MIT License'
     ],
     keywords='bandit machine learning',
