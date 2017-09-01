@@ -265,8 +265,6 @@ def EllipseAnimation(core_dict):
     y_min -= y_margin/5  # less margin at bottom
 
     # set up the figure and axes
-    # fig = plt.figure(figsize=(14,9), facecolor='white')
-    # ax = fig.add_subplot(111, axisbg='white')
 
     # initialize the bandit
     for i in range(sim.bandit.n_arms):
