@@ -1,7 +1,4 @@
-import argparse
 import os
-
-# parser = argparse.ArgumentParser(description="A command line interface for the banditvis module.")
 
 def safe_save(file_name):
     """Save a plot safely."""

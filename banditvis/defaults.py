@@ -16,8 +16,3 @@ CORE_DEFAULTS = {
     'PlotTitle': False,
     'DeleteData': False
 }
-
-def load_user():
-    with open(os.path.dirname(__file__) + '/user_defaults.pkl', 'rb') as handle:
-        _user = pickle.load(handle)
-    return _user

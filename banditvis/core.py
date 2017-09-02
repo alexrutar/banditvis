@@ -269,39 +269,6 @@ class AdvBandit:
         return None
 
 
-class Bandit:
-    def __init__(self, bandit_arm):
-        self.seq, self.distr = bandit_arm.give()
-        self.info = bandit_arm.info  # the pre-calculated reward sequences
-        self.pulled = np.full_like(self.seq, False, dtype=bool)  # tells which arms were pulled in each round (boolean array)
-        self.timestep = 0
-        self.n_arms, self.horizon = self.seq.shape
-        self.T = np.zeros(self.n_arms, dtype=int)
-        return None
-
-    def giveRegret(self):
-        values = self.pulled * self.distr
-        total_reward = np.sum(values)
-        # the slice shortens the row by truncating any columns beyond the timestep
-        best_arm_reward = np.amin(np.sum(self.distr[:,:self.timestep], axis=1))  # compute the best arm loss
-        return total_reward - best_arm_reward
-
-    def pullArm(self, arm):
-        self.T[arm] += 1
-        self.pulled[arm][self.timestep] = True
-        self.timestep += 1
-        return None
-
-    def fullInfo(self):
-        print("\n" + "+" + "-"*85 + "+")
-        for i, sub_dict in enumerate(self.info):
-            print('Arm {}, pulled {} times: {}'.format(i, self.T[i], sub_dict))
-        print('Regret {}, Timestep {} / {}'.format(self.giveRegret(), self.timestep, self.horizon))
-        print(self.seq)
-        print(self.pulled)
-        print(self.distr)
-        print("+" + "-"*85 + "+" + "\n")
-
 class Algorithm:
     """
     The Algorithm class specifies the behaviour of an algorithm.

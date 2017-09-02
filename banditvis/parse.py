@@ -9,7 +9,7 @@ from pprint import pprint
 
 from .helper import msplit
 from .formatting import bcolors
-from .defaults import load_user, CORE_DEFAULTS
+from .defaults import CORE_DEFAULTS
 
 def Parse(user_file, **arg_dict):
     """
@@ -120,7 +120,7 @@ def DictCheck(core_dict):
 
     else:
         sys.exit(bcolors.FAIL
-            + '\n\nIf you get this message, something wend badly wrong...\n'
+            + '\n\nIf you get this message, something went badly wrong...\n'
             + bcolors.ENDC
         )
     return check.give()
@@ -128,14 +128,13 @@ def DictCheck(core_dict):
 
 class CoreDict(dict):
     """
-    Subclasses dict to change behaviour with missing key (allows setting of deafults easily) and
+    Subclasses dict to change behaviour with missing key (allows setting of defults easily) and
     some other custom methods.
     """
     def __init__(self, in_dict, core_defaults=CORE_DEFAULTS, **arg_dict):
-    # def __init__(self, in_dict, core_defaults=CORE_DEFAULTS, user_defaults=load_user(), **arg_dict):
         dict.__init__(self, in_dict)
 
-        # precedence: arg_dict, then user_defaults, then core_defaults
+        # precedence: arg_dict, then core_defaults
         self.default = {**core_defaults, **arg_dict}
         self.ignore = {'InputData', 'DataFolder', 'Animate'}
         self.warning_list = []
