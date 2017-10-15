@@ -10,6 +10,7 @@ from scipy.stats import beta
 from .simulation import ReMapSim
 from .formatting import cmap_colors, mpl_defaults
 
+import time
 
 def HistAnimation(core_dict):
     """
@@ -314,11 +315,14 @@ def EllipseAnimation(core_dict):
         return ellip
 
     # the animation update function
+    
+    pause = False
     def _update(num, confidence):
-        nonlocal ax
+        nonlocal ax, pause
 
         # step the bandit
-        sim.runStep(1, horizon)
+        if not pause:
+            sim.runStep(1, horizon)
         rho = sim.bandit.dim * np.log(sim.bandit.timestep[0])
         G_inv = np.linalg.inv(sim.bandit.G)
         bandit_mean = sim.bandit.U
@@ -338,7 +342,7 @@ def EllipseAnimation(core_dict):
                 edgecolor='None',
                 alpha=0.65 ))
 
-        # format the axes
+            # format the axes
         ax.spines['left'].set_visible(True)
         ax.xaxis.set_ticks_position('bottom')
         ax.spines['bottom'].set_position(('data',0))
@@ -359,60 +363,60 @@ def EllipseAnimation(core_dict):
                 alpha=0.2,
                 facecolor='none'))
 
-        # position of mean vector
+            # position of mean vector
         labelstr = 'True Mean'
         if sim_dict['Normalized']:
             labelstr = 'Normalized Mean'
         plt.plot([mean[0]],[mean[1]], "o",
-            color='black',
-            label=labelstr)
+                color='black',
+                label=labelstr)
 
         # plot the ellipse and the mean; checks for LevelCurves option
         if (sim.alg.var_dict['algtype'].__name__ == "TS_Lin"
-            and core_dict['LevelCurves'] == True):
+                and core_dict['LevelCurves'] == True):
             for i in [33, 29, 25, 21, 17, 13, 9, 5, 1]:
                 plot_ellipse(i, G_inv, bandit_mean,
-                    alpha=0.1,
-                    ls='dashed',
-                    facecolor=cmap1(0.2),
-                    edgecolor='black')
+                        alpha=0.1,
+                        ls='dashed',
+                        facecolor=cmap1(0.2),
+                        edgecolor='black')
         else:
             plot_ellipse(rho, G_inv, bandit_mean,
-                alpha=0.2,
-                facecolor=cmap1(0.5),
-                edgecolor=cmap1(1.0))
-        plt.plot([sim.bandit.U[0]], [sim.bandit.U[1]], "o",
-            markerfacecolor=cmap2(0.5),
-            markeredgecolor=cmap2(1.0),
-            label='Approximated Mean')
+                    alpha=0.2,
+                    facecolor=cmap1(0.5),
+                    edgecolor=cmap1(1.0))
+            plt.plot([sim.bandit.U[0]], [sim.bandit.U[1]], "o",
+                    markerfacecolor=cmap2(0.5),
+                    markeredgecolor=cmap2(1.0),
+                    label='Approximated Mean')
 
-        # HelpLines: dashed projection lines to show reward value
+            # HelpLines: dashed projection lines to show reward value
         if core_dict['HelpLines']:
             for proj, arm in zip(projs, arms):
                 plt.plot([proj[0], arm[0]], [proj[1], arm[1]],
-                    color='black',
-                    linestyle='dashdot',
-                    linewidth=0.8)
-            plt.plot([-mean[0]*50,mean[0]*50],[-mean[1]*50,mean[1]*50], "--",
-                linewidth=0.5,
-                markersize=3,
-                color='black')
+                        color='black',
+                        linestyle='dashdot',
+                        linewidth=0.8)
+                plt.plot([-mean[0]*50,mean[0]*50],[-mean[1]*50,mean[1]*50], "--",
+                        linewidth=0.5,
+                        markersize=3,
+                        color='black')
 
-        # arm vector points
+                # arm vector points
         plt.plot([arm[0] for arm in sim.bandit.arm_vecs],
-            [arm[1] for arm in sim.bandit.arm_vecs], "o",
-            markersize=5,
-            markerfacecolor=cmap1(0.5),
-            markeredgecolor=cmap1(1.0),
-            label='Arm Vectors')
+                [arm[1] for arm in sim.bandit.arm_vecs], "o",
+                markersize=5,
+                markerfacecolor=cmap1(0.5),
+                markeredgecolor=cmap1(1.0),
+                label='Arm Vectors')
 
         # chosen arm; draws a red circle around it
         plt.plot(chosen_arm[0],chosen_arm[1], "or",
-            markersize=10,
-            markerfacecolor='none',
-            markeredgecolor='red',
-            markeredgewidth=2,
-            label='Chosen Arm')
+                markersize=10,
+                markerfacecolor='none',
+                markeredgecolor='red',
+                markeredgewidth=2,
+                label='Chosen Arm')
 
         # legend and title
         legend = plt.legend(loc='upper right')
@@ -421,18 +425,22 @@ def EllipseAnimation(core_dict):
 
         # additional information legend
         blank_path_1 = mpatches.Patch(
-            label='Regret: {:04.2f}'.format(sim.bandit.giveRegret()))
+                label='Regret: {:04.2f}'.format(sim.bandit.giveRegret()))
         blank_path_2 = mpatches.Patch(
-            label='Timestep: {:2d}'.format(sim.bandit.timestep[0]))
+                label='Timestep: {:2d}'.format(sim.bandit.timestep[0]))
         legend_2 = plt.legend(
-            handles=[blank_path_1, blank_path_2],
-            loc='upper left',
-            handlelength=0,
-            handletextpad=0)
+                handles=[blank_path_1, blank_path_2],
+                loc='upper left',
+                handlelength=0,
+                handletextpad=0)
         legend_2.get_frame().set_linewidth(1)
 
         plt.title(title)
 
+    def onClick(event):
+        nonlocal pause
+        pause ^= True
+    fig.canvas.mpl_connect('button_press_event', onClick)
     # the animation declaration
     my_ani = animation.FuncAnimation(fig, _update,
         fargs=(sim.bandit.U_conf, ),
