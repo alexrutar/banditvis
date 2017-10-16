@@ -118,12 +118,14 @@ def ConfAnimation(core_dict):
     for i in range(arms):
         sim.bandit.pullArm(i)
 
+    pause = False
     # the animation update function
     def _update(num, confidence):
-        nonlocal ax
+        nonlocal ax, pause
 
         # ste bandit 1 timestep
-        sim.runStep(1, horizon)
+        if not pause:
+            sim.runStep(1, horizon)
         confidence = sim.bandit.U_conf
         max_confidence = np.amax(sim.bandit.U_conf)
 
@@ -212,6 +214,10 @@ def ConfAnimation(core_dict):
 
         plt.title(title)
 
+    def onClick(event):
+        nonlocal pause
+        pause ^= True
+    fig.canvas.mpl_connect('button_press_event', onClick)
     # the animation declaration
     my_ani = animation.FuncAnimation(fig, _update,
         fargs=(sim.bandit.U_conf, ),
@@ -477,13 +483,15 @@ def DistAnimation(core_dict):
     def npdf(x, mu, sigma):
         return 0.39894228 / sigma * 0.60653066**(((x-mu)/(sigma))**2)
 
+    pause = False
     # the animation update function
     def _update(num, confidence):
-        nonlocal ax, xlims
+        nonlocal ax, xlims, pause
         plt.cla()
 
         # step the bandit
-        sim.runStep(1, horizon)
+        if not pause:
+            sim.runStep(1, horizon)
         samples = 500
         xdata = np.tile(np.linspace(xlims[0], xlims[1], samples), (n_arms,1))
         if sim.alg.var_dict['algtype'].__name__[-5:] == 'Gauss':
@@ -550,6 +558,10 @@ def DistAnimation(core_dict):
 
         plt.title(title)
 
+    def onClick(event):
+        nonlocal pause
+        pause ^= True
+    fig.canvas.mpl_connect('button_press_event', onClick)
     # the animation declaration
     my_ani = animation.FuncAnimation(fig, _update,
         fargs=(sim.bandit.U_conf, ),
